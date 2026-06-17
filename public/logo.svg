@@ -1,0 +1,40 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 500 500" width="100%" height="100%">
+  <defs>
+    <style>
+      @import url('https://fonts.googleapis.com/css2?family=Dancing+Script:wght@600&amp;family=Playfair+Display:ital,wght@0,700;1,700&amp;display=swap');
+      
+      .logo-serif {
+        font-family: 'Playfair Display', 'Georgia', serif;
+        font-size: 260px;
+        font-weight: 700;
+        fill: #ffffff;
+      }
+      
+      .logo-line {
+        stroke: #ff5722;
+        stroke-width: 3;
+        stroke-linecap: round;
+      }
+      
+      .logo-cursive {
+        font-family: 'Dancing Script', 'Brush Script MT', cursive;
+        font-size: 64px;
+        font-weight: 600;
+        fill: #ff5722;
+        text-shadow: 0 0 8px rgba(8, 8, 10, 0.9), 0 0 15px rgba(8, 8, 10, 0.9);
+      }
+    </style>
+  </defs>
+
+  <!-- Left Letter (P) -->
+  <text x="140" y="295" class="logo-serif" text-anchor="middle">P</text>
+  
+  <!-- Right Letter (E) -->
+  <text x="350" y="295" class="logo-serif" text-anchor="middle">E</text>
+
+  <!-- Vertical Divider Line -->
+  <line x1="250" y1="90" x2="250" y2="380" class="logo-line" />
+
+  <!-- Overlay Text (Prime Edits) -->
+  <text x="250" y="265" class="logo-cursive" text-anchor="middle">Prime Edits</text>
+</svg>
