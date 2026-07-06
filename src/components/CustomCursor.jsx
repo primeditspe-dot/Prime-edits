@@ -1,5 +1,4 @@
 import React, { useEffect, useRef, useState } from 'react';
-import gsap from 'gsap';
 
 export default function CustomCursor() {
   const dotRef = useRef(null);
@@ -12,56 +11,67 @@ export default function CustomCursor() {
     const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
     if (isMobile) return;
 
-    // Apply global hidden cursor style
+    // Apply global hidden cursor style for all interactive elements
     const styleEl = document.createElement('style');
     styleEl.innerHTML = `
-      body, a, button, select, input, textarea, [role="button"] {
+      body, a, button, select, input, textarea, [role="button"], label, .showcase-card, .how-card, .bento-card {
         cursor: none !important;
       }
     `;
     document.head.appendChild(styleEl);
 
-    // Initial setup
-    gsap.set([dotRef.current, ringRef.current], { xPercent: -50, yPercent: -50, x: 0, y: 0 });
+    // Position coordinates
+    const mouse = { x: window.innerWidth / 2, y: window.innerHeight / 2 };
+    const dot = { x: window.innerWidth / 2, y: window.innerHeight / 2 };
+    const ring = { x: window.innerWidth / 2, y: window.innerHeight / 2 };
 
     const onMouseMove = (e) => {
-      const { clientX: x, clientY: y } = e;
-
-      // Tight follow for center dot/badge
-      gsap.to(dotRef.current, {
-        x: x,
-        y: y,
-        duration: 0.1,
-        ease: 'power2.out'
-      });
-
-      // Lerping lag for outer ring
-      gsap.to(ringRef.current, {
-        x: x,
-        y: y,
-        duration: 0.35,
-        ease: 'power3.out'
-      });
+      mouse.x = e.clientX;
+      mouse.y = e.clientY;
     };
 
+    window.addEventListener('mousemove', onMouseMove, { passive: true });
+
+    let rafId = 0;
+    const tick = () => {
+      // Lerp center dot (fast follow)
+      dot.x += (mouse.x - dot.x) * 0.28;
+      dot.y += (mouse.y - dot.y) * 0.28;
+
+      // Lerp outer ring (lagged smooth follow)
+      ring.x += (mouse.x - ring.x) * 0.12;
+      ring.y += (mouse.y - ring.y) * 0.12;
+
+      if (dotRef.current) {
+        dotRef.current.style.transform = `translate3d(${dot.x}px, ${dot.y}px, 0) translate(-50%, -50%)`;
+      }
+      if (ringRef.current) {
+        ringRef.current.style.transform = `translate3d(${ring.x}px, ${ring.y}px, 0) translate(-50%, -50%)`;
+      }
+
+      rafId = requestAnimationFrame(tick);
+    };
+
+    rafId = requestAnimationFrame(tick);
+
+    // Expand cursor hover listener for links, buttons, and custom triggers
     const handleMouseOver = (e) => {
-      const target = e.target.closest('.work-card, [data-cursor]');
+      const target = e.target.closest('a, button, [role="button"], .showcase-card, .how-card, .bento-card, [data-cursor]');
       if (target) {
         setIsActive(true);
-        const text = target.getAttribute('data-cursor-text') || 'View Video';
+        const text = target.getAttribute('data-cursor-text') || 'View';
         setHoverText(text);
       }
     };
 
     const handleMouseOut = (e) => {
-      const target = e.target.closest('.work-card, [data-cursor]');
+      const target = e.target.closest('a, button, [role="button"], .showcase-card, .how-card, .bento-card, [data-cursor]');
       if (target) {
         setIsActive(false);
         setHoverText('');
       }
     };
 
-    window.addEventListener('mousemove', onMouseMove);
     document.addEventListener('mouseover', handleMouseOver);
     document.addEventListener('mouseout', handleMouseOut);
 
@@ -69,6 +79,7 @@ export default function CustomCursor() {
       window.removeEventListener('mousemove', onMouseMove);
       document.removeEventListener('mouseover', handleMouseOver);
       document.removeEventListener('mouseout', handleMouseOut);
+      cancelAnimationFrame(rafId);
       if (document.head.contains(styleEl)) {
         document.head.removeChild(styleEl);
       }

@@ -15,7 +15,7 @@ export default function Preloader({ onComplete }) {
       }
     });
 
-    // Make elements visible (reversing the Webflow visibility hack)
+    // Make elements visible (reversing Webflow style visibility hides)
     gsap.set([containerRef.current, textRef.current, topPanelRef.current, bottomPanelRef.current], { visibility: 'visible' });
 
     // Entrance of logo text
@@ -24,9 +24,9 @@ export default function Preloader({ onComplete }) {
       { opacity: 1, y: 0, duration: 0.6, ease: 'power3.out' }
     );
 
-    // Translate words: "Design" -> "Build" -> "Impact"
-    tl.to(wordsRef.current, { y: -40, duration: 0.6, ease: 'power3.inOut', delay: 0.4 });
-    tl.to(wordsRef.current, { y: -80, duration: 0.6, ease: 'power3.inOut', delay: 0.4 });
+    // Translate words: "Edit" -> "Style" -> "Retain" (52px offsets matches index.css)
+    tl.to(wordsRef.current, { y: -52, duration: 0.6, ease: 'power3.inOut', delay: 0.4 });
+    tl.to(wordsRef.current, { y: -104, duration: 0.6, ease: 'power3.inOut', delay: 0.4 });
 
     // Animate out the panels and fade the preloader text
     tl.to(topPanelRef.current, { scaleY: 0, duration: 0.8, ease: 'power4.inOut', delay: 0.2 });
@@ -37,19 +37,19 @@ export default function Preloader({ onComplete }) {
   }, [onComplete]);
 
   return (
-    <div ref={containerRef} className="preloader fixed inset-0 w-full h-full bg-black z-[10000] flex items-center justify-center overflow-hidden">
+    <div ref={containerRef} className="preloader fixed inset-0 w-full h-full bg-[#04050a] z-[10000] flex items-center justify-center overflow-hidden">
       {/* Upper and Lower Panel splits */}
-      <div ref={topPanelRef} className="line-bar-preload top absolute left-0 w-full h-1/2 bg-[#0a0a0d] z-[-1] origin-top"></div>
-      <div ref={bottomPanelRef} className="line-bar-preload bottom absolute left-0 w-full h-1/2 bg-[#0a0a0d] z-[-1] origin-bottom"></div>
+      <div ref={topPanelRef} className="line-bar-preload top absolute left-0 w-full h-1/2 bg-[#020306] z-[-1] origin-top"></div>
+      <div ref={bottomPanelRef} className="line-bar-preload bottom absolute left-0 w-full h-1/2 bg-[#020306] z-[-1] origin-bottom"></div>
 
       <div ref={textRef} className="wrap-preloader-logo flex items-center justify-center flex-col select-none">
-        <div className="preload-text-wrap flex items-center gap-4 text-white font-extrabold text-xl md:text-3xl uppercase tracking-widest overflow-hidden">
-          <span>Prime Edits</span>
-          <div className="preload-text-list h-[40px] overflow-hidden relative font-bold">
+        <div className="preload-text-wrap flex items-center gap-4 text-white font-bebas text-2xl md:text-4xl uppercase tracking-widest overflow-hidden">
+          <span>PRIME EDITS</span>
+          <div className="preload-text-list h-[52px] overflow-hidden relative font-bebas">
             <div ref={wordsRef} className="flex flex-col">
-              <span className="preload-text-list-item h-[40px] text-[#ff5722] flex items-center">Design</span>
-              <span className="preload-text-list-item h-[40px] text-[#ff5722] flex items-center">Build</span>
-              <span className="preload-text-list-item h-[40px] text-[#ff5722] flex items-center">Impact</span>
+              <span className="preload-text-list-item h-[52px] text-[var(--color-cyan)] flex items-center">Edit</span>
+              <span className="preload-text-list-item h-[52px] text-[var(--color-cyan)] flex items-center">Style</span>
+              <span className="preload-text-list-item h-[52px] text-[var(--color-cyan)] flex items-center">Retain</span>
             </div>
           </div>
         </div>

@@ -7,7 +7,6 @@ export default function ContactForm() {
     email: '',
     phone: '',
     service: 'YouTube Video Editing',
-    budget: '$500 - $1,000',
     message: ''
   });
 
@@ -31,13 +30,6 @@ export default function ContactForm() {
     'Custom Pack / Other'
   ];
 
-  const budgetsList = [
-    'Under $500',
-    '$500 - $1,000',
-    '$1,000 - $3,000',
-    '$3,000 - $5,000',
-    '$5,000+'
-  ];
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
@@ -172,7 +164,6 @@ export default function ContactForm() {
           email: '',
           phone: '',
           service: 'YouTube Video Editing',
-          budget: '$500 - $1,000',
           message: ''
         });
         removeFile();
@@ -187,17 +178,17 @@ export default function ContactForm() {
   };
 
   return (
-    <div className="w-full border border-[#1a1a24] bg-[#0a0a0d] p-6 md:p-10 shadow-xl relative overflow-hidden">
+    <div className="w-full glass rounded-3xl p-8 md:p-12 shadow-2xl relative overflow-hidden">
+      <div className="absolute -right-24 -top-24 h-48 w-48 rounded-full opacity-20 blur-3xl" style={{ background: 'radial-gradient(circle, var(--color-cyan), transparent 70%)' }}></div>
       
-      <div className="flex items-center gap-2 mb-2">
-        <div className="w-2 h-2 bg-[#ff5722]"></div>
-        <span className="font-mono text-xs uppercase tracking-widest text-[#ff5722]">brief form</span>
+      <div className="mb-4">
+        <span className="kicker">brief form</span>
       </div>
-      <h3 className="text-3xl font-bold font-display text-white mb-2 uppercase">Let's talk business</h3>
-      <p className="text-gray-500 text-sm mb-10 font-mono">Fill details below. Attach B-roll clips for quick quotes.</p>
+      <h3 className="h-display text-4xl sm:text-5xl text-gradient mb-3 uppercase">Let's talk business</h3>
+      <p className="text-fg-dim text-sm mb-10 font-mono">Fill in the details below. Send us your project assets and reference links.</p>
 
       {submitStatus === 'success' && (
-        <div className="mb-8 p-4 rounded-lg bg-green-500/5 border border-green-500/20 text-green-300 flex items-start gap-3">
+        <div className="mb-8 p-4 rounded-xl bg-green-500/5 border border-green-500/20 text-green-300 flex items-start gap-3">
           <CheckCircle className="w-5 h-5 shrink-0 text-green-400 mt-0.5" />
           <div>
             <h4 className="font-mono text-sm font-semibold text-white uppercase tracking-wider">Inquiry Dispatched</h4>
@@ -207,7 +198,7 @@ export default function ContactForm() {
       )}
 
       {submitStatus === 'error' && (
-        <div className="mb-8 p-4 rounded-lg bg-red-500/5 border border-red-500/20 text-red-300 flex items-start gap-3">
+        <div className="mb-8 p-4 rounded-xl bg-red-500/5 border border-red-500/20 text-red-300 flex items-start gap-3">
           <AlertCircle className="w-5 h-5 shrink-0 text-red-400 mt-0.5" />
           <div>
             <h4 className="font-mono text-sm font-semibold text-white uppercase tracking-wider">Dispatch Error</h4>
@@ -220,104 +211,93 @@ export default function ContactForm() {
         
         {/* Name Input */}
         <div className="flex flex-col gap-2">
-          <label className="text-[10px] font-mono font-bold tracking-widest uppercase text-gray-500" htmlFor="contact-name">Name *</label>
-          <input 
-            id="contact-name"
-            type="text" 
-            name="name" 
-            value={formData.name} 
-            onChange={handleInputChange} 
-            required
-            className="w-full pb-3 bg-transparent text-white border-b border-[#1a1a24] focus:border-[#ff5722] focus:outline-none transition-colors font-mono text-sm"
-            placeholder="Karan Verma"
-          />
+          <label className="text-[10px] font-mono font-bold tracking-widest uppercase text-fg-faint" htmlFor="contact-name">Name *</label>
+          <div className="glass flex items-center rounded-full px-2 py-1.5 border border-white/5 focus-within:border-white/20 transition-colors">
+            <input 
+              id="contact-name"
+              type="text" 
+              name="name" 
+              value={formData.name} 
+              onChange={handleInputChange} 
+              required
+              className="w-full bg-transparent px-5 py-2 text-[0.95rem] text-white placeholder:text-fg-faint focus:outline-none font-mono"
+              placeholder="Karan Verma"
+            />
+          </div>
         </div>
 
         {/* Email Input */}
         <div className="flex flex-col gap-2">
-          <label className="text-[10px] font-mono font-bold tracking-widest uppercase text-gray-500" htmlFor="contact-email">Email Address *</label>
-          <input 
-            id="contact-email"
-            type="email" 
-            name="email" 
-            value={formData.email} 
-            onChange={handleInputChange} 
-            required
-            className="w-full pb-3 bg-transparent text-white border-b border-[#1a1a24] focus:border-[#ff5722] focus:outline-none transition-colors font-mono text-sm"
-            placeholder="karan@channel.com"
-          />
+          <label className="text-[10px] font-mono font-bold tracking-widest uppercase text-fg-faint" htmlFor="contact-email">Email Address *</label>
+          <div className="glass flex items-center rounded-full px-2 py-1.5 border border-white/5 focus-within:border-white/20 transition-colors">
+            <input 
+              id="contact-email"
+              type="email" 
+              name="email" 
+              value={formData.email} 
+              onChange={handleInputChange} 
+              required
+              className="w-full bg-transparent px-5 py-2 text-[0.95rem] text-white placeholder:text-fg-faint focus:outline-none font-mono"
+              placeholder="karan@channel.com"
+            />
+          </div>
         </div>
 
         {/* Phone & Service */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
           <div className="flex flex-col gap-2">
-            <label className="text-[10px] font-mono font-bold tracking-widest uppercase text-gray-500" htmlFor="contact-phone">Phone / WhatsApp</label>
-            <input 
-              id="contact-phone"
-              type="tel" 
-              name="phone" 
-              value={formData.phone} 
-              onChange={handleInputChange} 
-              className="w-full pb-3 bg-transparent text-white border-b border-[#1a1a24] focus:border-[#ff5722] focus:outline-none transition-colors font-mono text-sm"
-              placeholder="+91 98989 89898"
-            />
+            <label className="text-[10px] font-mono font-bold tracking-widest uppercase text-fg-faint" htmlFor="contact-phone">Phone / WhatsApp</label>
+            <div className="glass flex items-center rounded-full px-2 py-1.5 border border-white/5 focus-within:border-white/20 transition-colors">
+              <input 
+                id="contact-phone"
+                type="tel" 
+                name="phone" 
+                value={formData.phone} 
+                onChange={handleInputChange} 
+                className="w-full bg-transparent px-5 py-2 text-[0.95rem] text-white placeholder:text-fg-faint focus:outline-none font-mono"
+                placeholder="+91 98989 89898"
+              />
+            </div>
           </div>
           <div className="flex flex-col gap-2">
-            <label className="text-[10px] font-mono font-bold tracking-widest uppercase text-gray-500" htmlFor="contact-service">Required Service</label>
-            <select 
-              id="contact-service"
-              name="service" 
-              value={formData.service} 
-              onChange={handleInputChange}
-              className="w-full pb-3 bg-transparent text-white border-b border-[#1a1a24] focus:border-[#ff5722] focus:outline-none transition-colors font-mono text-xs uppercase"
-            >
-              {servicesList.map((service, idx) => (
-                <option key={idx} value={service} className="bg-[#0d0d12] text-white uppercase">{service}</option>
-              ))}
-            </select>
+            <label className="text-[10px] font-mono font-bold tracking-widest uppercase text-fg-faint" htmlFor="contact-service">Required Service</label>
+            <div className="glass flex items-center rounded-full px-5 py-1.5 border border-white/5 focus-within:border-white/20 transition-colors">
+              <select 
+                id="contact-service"
+                name="service" 
+                value={formData.service} 
+                onChange={handleInputChange}
+                className="w-full bg-transparent py-2 text-[0.95rem] text-white focus:outline-none cursor-pointer uppercase font-mono text-xs"
+              >
+                {servicesList.map((service, idx) => (
+                  <option key={idx} value={service} className="bg-[#04050a] text-white uppercase">{service}</option>
+                ))}
+              </select>
+            </div>
           </div>
         </div>
 
-        {/* Budget Toggles */}
-        <div className="flex flex-col gap-3">
-          <label className="text-[10px] font-mono font-bold tracking-widest uppercase text-gray-500" htmlFor="contact-budget">Estimated Budget</label>
-          <div className="flex flex-wrap gap-2">
-            {budgetsList.map((budgetOpt, idx) => (
-              <button
-                key={idx}
-                type="button"
-                id={`budget-opt-${idx}`}
-                onClick={() => setFormData(prev => ({ ...prev, budget: budgetOpt }))}
-                className={`py-2 px-4 text-[10px] font-mono border transition-all ${
-                  formData.budget === budgetOpt 
-                    ? 'border-[#ff5722] bg-[#ff5722]/5 text-[#ff5722]' 
-                    : 'border-[#1a1a24] bg-transparent text-gray-400 hover:text-white'
-                }`}
-              >
-                {budgetOpt}
-              </button>
-            ))}
-          </div>
-        </div>
 
         {/* Message Input */}
         <div className="flex flex-col gap-2">
-          <label className="text-[10px] font-mono font-bold tracking-widest uppercase text-gray-500" htmlFor="contact-message">Project brief</label>
-          <textarea 
-            id="contact-message"
-            name="message" 
-            value={formData.message} 
-            onChange={handleInputChange} 
-            required
-            rows={3}
-            className="w-full pb-3 bg-transparent text-white border-b border-[#1a1a24] focus:border-[#ff5722] focus:outline-none transition-colors resize-none font-mono text-sm"
-            placeholder="Tell us about the project assets, timing, dynamic overlays, grading specs..."
-          ></textarea>
+          <label className="text-[10px] font-mono font-bold tracking-widest uppercase text-fg-faint" htmlFor="contact-message">Project brief</label>
+          <div className="glass flex items-center rounded-2xl px-2 py-2 border border-white/5 focus-within:border-white/20 transition-colors">
+            <textarea 
+              id="contact-message"
+              name="message" 
+              value={formData.message} 
+              onChange={handleInputChange} 
+              required
+              rows={4}
+              className="w-full bg-transparent px-5 py-2 text-[0.95rem] text-white placeholder:text-fg-faint focus:outline-none resize-none font-mono"
+              placeholder="Tell us about your channels, pacing requirements, overlay styles, reference channels..."
+            ></textarea>
+          </div>
         </div>
 
         {/* Drag Drop File Uploader */}
         <div className="flex flex-col gap-2">
-          <label className="text-[10px] font-mono font-bold tracking-widest uppercase text-gray-500">Asset upload (optional)</label>
+          <label className="text-[10px] font-mono font-bold tracking-widest uppercase text-fg-faint">Asset upload (optional)</label>
           
           {!file ? (
             <div 
@@ -326,10 +306,10 @@ export default function ContactForm() {
               onDragLeave={handleDrag}
               onDrop={handleDrop}
               onClick={() => fileInputRef.current.click()}
-              className={`border border-dashed border-[#1a1a24] p-6 flex flex-col items-center justify-center cursor-pointer transition-all ${
+              className={`border border-dashed p-8 rounded-2xl flex flex-col items-center justify-center cursor-pointer transition-all ${
                 dragActive 
-                  ? 'border-[#ff5722] bg-[#ff5722]/5' 
-                  : 'bg-transparent hover:border-gray-600'
+                  ? 'border-[var(--color-cyan)] bg-[var(--color-cyan)]/5 shadow-[0_0_15px_rgba(76,219,232,0.1)]' 
+                  : 'border-white/10 bg-transparent hover:border-white/30'
               }`}
             >
               <input 
@@ -339,28 +319,28 @@ export default function ContactForm() {
                 accept="video/*,image/*"
                 className="hidden" 
               />
-              <UploadCloud className="w-8 h-8 text-gray-600 mb-2" />
-              <p className="text-xs text-gray-300 font-mono">DRAG & DROP CLIPS OR <span className="text-[#ff5722]">BROWSE</span></p>
-              <p className="text-[9px] text-gray-600 mt-1 font-mono">MP4, MOV, PNG, JPG (CLOUDINARY STORAGE)</p>
+              <UploadCloud className="w-8 h-8 text-fg-faint mb-2" />
+              <p className="text-xs text-white font-mono uppercase">Drag & drop files or <span className="text-[var(--color-cyan)]">browse</span></p>
+              <p className="text-[9px] text-fg-faint mt-1 font-mono uppercase">MP4, MOV, PNG, JPG (Cloudinary Storage)</p>
             </div>
           ) : (
-            <div className="border border-[#1a1a24] p-4 bg-[#0d0d12]/80 flex items-center justify-between">
+            <div className="border border-white/10 p-4 rounded-xl bg-white/5 flex items-center justify-between">
               <div className="flex items-center gap-3 overflow-hidden">
-                <div className="w-8 h-8 bg-[#ff5722]/10 border border-[#ff5722]/20 flex items-center justify-center shrink-0">
-                  <Film className="w-4 h-4 text-[#ff5722]" />
+                <div className="w-9 h-9 rounded-lg bg-[var(--color-cyan)]/10 border border-[var(--color-cyan)]/25 flex items-center justify-center shrink-0">
+                  <Film className="w-4 h-4 text-[var(--color-cyan)]" />
                 </div>
                 <div className="overflow-hidden font-mono text-xs">
                   <p className="text-white truncate">{file.name}</p>
-                  <p className="text-[9px] text-gray-500">{(file.size / (1024 * 1024)).toFixed(2)} MB</p>
+                  <p className="text-[9px] text-fg-dim">{(file.size / (1024 * 1024)).toFixed(2)} MB</p>
                 </div>
               </div>
               
               <div className="flex items-center gap-4 shrink-0 font-mono text-xs">
                 {uploading ? (
                   <div className="flex flex-col items-end gap-1">
-                    <span className="text-[10px] text-[#ff5722]">{uploadProgress}%</span>
-                    <div className="w-16 bg-[#1a1a24] h-1 rounded-full overflow-hidden">
-                      <div className="bg-[#ff5722] h-full transition-all duration-150" style={{ width: `${uploadProgress}%` }}></div>
+                    <span className="text-[10px] text-[var(--color-cyan)]">{uploadProgress}%</span>
+                    <div className="w-16 bg-white/10 h-1 rounded-full overflow-hidden">
+                      <div className="bg-[var(--color-cyan)] h-full transition-all duration-150" style={{ width: `${uploadProgress}%` }}></div>
                     </div>
                   </div>
                 ) : (
@@ -370,7 +350,7 @@ export default function ContactForm() {
                 <button 
                   type="button" 
                   onClick={removeFile}
-                  className="p-1 rounded hover:bg-[#1a1a24] text-gray-400 hover:text-white transition-colors"
+                  className="p-1 rounded hover:bg-white/10 text-fg-faint hover:text-white transition-colors cursor-pointer"
                 >
                   <X className="w-4 h-4" />
                 </button>
@@ -379,29 +359,13 @@ export default function ContactForm() {
           )}
         </div>
 
-        {/* Custom Slide-on-Hover Action Button */}
+        {/* Submit button following subtl.cc style */}
         <button
           type="submit"
-          id="submit-quote-btn"
           disabled={submitting || uploading}
-          className="w-full h-14 bg-[#ff5722] disabled:opacity-50 text-black font-bold uppercase tracking-wider text-xs transition-all flex items-center justify-center gap-2 cursor-pointer btn-slide-container"
+          className="btn btn-primary w-full h-[54px] text-[0.95rem] font-bold uppercase tracking-wider transition-all cursor-pointer disabled:opacity-50 disabled:pointer-events-none"
         >
-          <div className="h-5 overflow-hidden relative w-full flex items-center justify-center">
-            {submitting ? (
-              <span className="font-mono">DISPATCHING BRIEF...</span>
-            ) : (
-              <>
-                <div className="flex items-center gap-2 absolute transition-all duration-350 btn-slide-text btn-slide-text-1">
-                  <span>DISPATCH BRIEF</span>
-                  <ArrowUpRight className="w-4 h-4 shrink-0" />
-                </div>
-                <div className="flex items-center gap-2 absolute translate-y-5 transition-all duration-350 btn-slide-text btn-slide-text-2">
-                  <span>SEND NOW</span>
-                  <ArrowUpRight className="w-4 h-4 shrink-0" />
-                </div>
-              </>
-            )}
-          </div>
+          {submitting ? 'Dispatching brief...' : 'Send Briefing'}
         </button>
 
       </form>

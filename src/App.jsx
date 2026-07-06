@@ -1,9 +1,9 @@
 import React, { useState, useEffect, useRef } from 'react';
 import {
   Film, Video, Play, Sparkles, Wand2, ShieldCheck, Zap,
-  Layers, Palette, Scissors, ArrowUpRight,
+  Layers, Palette, Scissors, ArrowUpRight, ArrowLeft, ArrowRight,
   Phone, Mail, MapPin, Check, Plus, Minus, ChevronDown, Award, Globe,
-  Clock, HeartHandshake, Instagram, X
+  Clock, HeartHandshake, Instagram, X, ArrowUp
 } from 'lucide-react';
 import Lenis from 'lenis';
 import gsap from 'gsap';
@@ -11,28 +11,26 @@ import { ScrollTrigger } from 'gsap/ScrollTrigger';
 
 import Preloader from './components/Preloader';
 import CustomCursor from './components/CustomCursor';
-import HeroImageTrail from './components/HeroImageTrail';
+import WebGLBackground from './components/WebGLBackground';
+import ScrollReveal from './components/ScrollReveal';
 import ContactForm from './components/ContactForm';
-import ScrollRevealText from './components/ScrollRevealText';
 
 // Register GSAP plugins
 gsap.registerPlugin(ScrollTrigger);
 
 export default function App() {
   const [preloaderDone, setPreloaderDone] = useState(false);
-  const [activeServiceIndex, setActiveServiceIndex] = useState(0);
-  const [openFaq, setOpenFaq] = useState(null);
-  const [menuOpen, setMenuOpen] = useState(false);
-  const [activeProcessIndex, setActiveProcessIndex] = useState(0);
+  const [scrolled, setScrolled] = useState(false);
   const [timeString, setTimeString] = useState('');
+  const [heroEmail, setHeroEmail] = useState('');
+  const [activeWordIdx, setActiveWordIdx] = useState(0);
+  const [exportProgress, setExportProgress] = useState(0);
+  const [menuOpen, setMenuOpen] = useState(false);
 
-  // Refs for ScrollTrigger
-  const serviceSectionRef = useRef(null);
-  const workSectionRef = useRef(null);
-  const trackRef = useRef(null);
-  const revealTextRef = useRef(null);
-  const heroTextRef = useRef(null);
-
+  // Refs for scroll elements and carousel
+  const headerRef = useRef(null);
+  const carouselRef = useRef(null);
+  
   // Initialize Lenis Smooth Scroll
   useEffect(() => {
     if (!preloaderDone) return;
@@ -57,95 +55,87 @@ export default function App() {
     };
   }, [preloaderDone]);
 
-  // Scroll Animations: Reveal text & Hero parallax
+  // Entrance animations for the hero elements
   useEffect(() => {
     if (!preloaderDone) return;
 
-    // Reveal and zoom text ("coming ahead") as user scrolls
-    if (revealTextRef.current) {
-      // Entrance fade & slide-up (triggers once)
-      gsap.fromTo(revealTextRef.current,
-        { opacity: 0, y: 40 },
-        {
-          opacity: 1,
-          y: 0,
-          duration: 1.2,
-          ease: 'power3.out',
-          scrollTrigger: {
-            trigger: revealTextRef.current,
-            start: 'top 90%',
-            toggleActions: 'play none none none'
-          }
-        }
-      );
-
-      // Parallax scale-up ("coming ahead" on Z-axis) on scroll scrub
-      gsap.fromTo(revealTextRef.current,
-        { scale: 0.92, transformOrigin: 'center center' },
-        {
-          scale: 1.12,
-          ease: 'none',
-          scrollTrigger: {
-            trigger: revealTextRef.current,
-            start: 'top bottom',
-            end: 'bottom top',
-            scrub: true
-          }
-        }
+    // Header entrance
+    if (headerRef.current) {
+      gsap.fromTo(headerRef.current,
+        { opacity: 0, y: -40 },
+        { opacity: 1, y: 0, duration: 1, ease: 'power3.out', delay: 0.1 }
       );
     }
 
-    // Hero Text Parallax & Fade
-    if (heroTextRef.current) {
-      gsap.to(heroTextRef.current, {
-        y: -100,
-        opacity: 0.2,
-        ease: 'none',
-        scrollTrigger: {
-          trigger: '#hero',
-          start: 'top top',
-          end: 'bottom top',
-          scrub: true
-        }
-      });
-    }
+    // Scroll listener for header background
+    const handleScroll = () => {
+      setScrolled(window.scrollY > 20);
+    };
+    window.addEventListener('scroll', handleScroll);
 
-    // Sticky Scroll Services Image Transition
-    if (serviceSectionRef.current) {
-      ScrollTrigger.create({
-        trigger: serviceSectionRef.current,
-        start: 'top top',
-        end: '+=200%',
-        scrub: true,
-        pin: true,
-        invalidateOnRefresh: true,
-        onUpdate: (self) => {
-          const progress = self.progress;
-          // Split into 4 segments corresponding to the 4 services
-          const idx = Math.min(3, Math.floor(progress * 4));
-          setActiveServiceIndex(idx);
-        }
-      });
-    }
+    // Hero entrance animations
+    gsap.fromTo(".hero-animate-badge",
+      { opacity: 0, y: 15 },
+      { opacity: 1, y: 0, duration: 0.8, ease: 'power3.out', delay: 0.3 }
+    );
 
-    // Horizontal scroll timeline in Latest Projects
-    if (workSectionRef.current && trackRef.current) {
-      gsap.to(trackRef.current, {
-        x: () => -(trackRef.current.scrollWidth - window.innerWidth),
-        ease: 'none',
-        scrollTrigger: {
-          trigger: workSectionRef.current,
-          start: 'top top',
-          end: () => "+=" + (trackRef.current.scrollWidth - window.innerWidth),
-          scrub: true,
-          pin: true,
-          invalidateOnRefresh: true
-        }
-      });
-    }
+    gsap.fromTo(".hero-animate-title span",
+      { opacity: 0, y: 40, filter: 'blur(8px)' },
+      { opacity: 1, y: 0, filter: 'blur(0px)', duration: 0.9, stagger: 0.1, ease: 'power3.out', delay: 0.4 }
+    );
+
+    gsap.fromTo(".hero-animate-text",
+      { opacity: 0, y: 20 },
+      { opacity: 1, y: 0, duration: 0.8, ease: 'power3.out', delay: 0.8 }
+    );
+
+    gsap.fromTo(".hero-animate-cta",
+      { opacity: 0, y: 20 },
+      { opacity: 1, y: 0, duration: 0.8, ease: 'power3.out', delay: 0.9 }
+    );
+
+    gsap.fromTo(".hero-animate-mockup",
+      { opacity: 0, scale: 0.94, y: 30 },
+      { opacity: 1, scale: 1, y: 0, duration: 1, ease: 'power3.out', delay: 0.8 }
+    );
 
     return () => {
-      ScrollTrigger.getAll().forEach(t => t.kill());
+      window.removeEventListener('scroll', handleScroll);
+    };
+  }, [preloaderDone]);
+
+  // Scroll velocity card skewing effect
+  useEffect(() => {
+    if (!preloaderDone) return;
+
+    let proxy = { skew: 0 };
+    const cards = gsap.utils.toArray('.how-card, .showcase-card, .bento-card');
+    
+    // Quick setters for performance
+    const skewSetters = cards.map(card => gsap.quickSetter(card, "skewY", "deg"));
+    const clamp = gsap.utils.clamp(-6, 6); // max 6 deg tilt
+
+    const trigger = ScrollTrigger.create({
+      onUpdate: (self) => {
+        let skew = clamp(self.getVelocity() / -450);
+        // Only animate if skew is significant
+        if (Math.abs(skew) > Math.abs(proxy.skew)) {
+          proxy.skew = skew;
+          gsap.to(proxy, {
+            skew: 0,
+            duration: 0.85,
+            ease: "power3.out",
+            overwrite: "auto",
+            onUpdate: () => {
+              skewSetters.forEach(setter => setter(proxy.skew));
+            }
+          });
+        }
+      }
+    });
+
+    return () => {
+      trigger.kill();
     };
   }, [preloaderDone]);
 
@@ -167,30 +157,71 @@ export default function App() {
     return () => clearInterval(interval);
   }, []);
 
-  const services = [
+  // Word highlight cycle animation (Bento Pacing card)
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setActiveWordIdx((prev) => (prev + 1) % 6);
+    }, 1500);
+    return () => clearInterval(interval);
+  }, []);
+
+  // Export progress loop animation (Bento Export card)
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setExportProgress((prev) => {
+        if (prev >= 100) return 0;
+        return prev + 1;
+      });
+    }, 45);
+    return () => clearInterval(interval);
+  }, []);
+
+  // Form input submit -> scrolls to contact brief and injects email
+  const handleHeroEmailSubmit = (e) => {
+    e.preventDefault();
+    const contactSection = document.getElementById('contact');
+    if (contactSection) {
+      contactSection.scrollIntoView({ behavior: 'smooth' });
+      // Injects email into form fields
+      const emailField = document.getElementById('contact-email');
+      if (emailField) {
+        emailField.value = heroEmail;
+        // Trigger React state change indirectly by dispatching event
+        const event = new Event('input', { bubbles: true });
+        emailField.dispatchEvent(event);
+      }
+    }
+  };
+
+  // Carousel click scroll handler
+  const handleCarouselScroll = (direction) => {
+    if (carouselRef.current) {
+      const scrollAmount = carouselRef.current.clientWidth * 0.8;
+      carouselRef.current.scrollBy({
+        left: direction === 'left' ? -scrollAmount : scrollAmount,
+        behavior: 'smooth'
+      });
+    }
+  };
+
+  const editSteps = [
     {
-      title: 'youtube video editing',
-      tag: '01 / YouTube Pacing',
-      image: 'https://cdn.prod.website-files.com/69afdc27b122b092c4b692ca/69e1acdfcfc3d13ebf6cde40_rectangle_57.webp',
-      desc: 'Infographics, smooth zoom cuts, sound design overlays, and high retention pacing built specifically for the YouTube algorithm.'
+      num: '01',
+      icon: '↑',
+      title: 'Upload your brief',
+      desc: 'Drop your raw camera files, zoom records, overlays, and instructions in our secure cloud folder.'
     },
     {
-      title: 'vertical shorts / reels',
-      tag: '02 / Micro Content',
-      image: 'https://cdn.prod.website-files.com/69afdc27b122b092c4b692ca/69e1a4ca02e824eb8b5c90c3_rectangle_15.webp',
-      desc: 'Cinematic crop formatting, kinetic captions, emoji triggers, and fast cuts designed to capture and hold visual attention under 60 seconds.'
+      num: '02',
+      icon: '✦',
+      title: 'Pace & Grade',
+      desc: 'We structure the timeline, apply retention zooms, grade the color profile, and construct the soundscape.'
     },
     {
-      title: 'cinematic brand promos',
-      tag: '03 / Production Grade',
-      image: 'https://cdn.prod.website-files.com/69afdc27b122b092c4b692ca/69e1acdfd95021a6dffd97ed_rectangle_57%20(2).webp',
-      desc: 'Sleek motion designs, heavy soundscapes, sound effects libraries, and commercial grading to elevate products and campaigns.'
-    },
-    {
-      title: 'color grading & vfx',
-      tag: '04 / Post Finish',
-      image: 'https://cdn.prod.website-files.com/69afdc27b122b092c4b692ca/69e1ace0e59b442d4899fd54_rectangle_57%20(1).webp',
-      desc: 'Cinematic film grades, greenscreen replacements, custom tracker banners, and transition edits to pull everything together.'
+      num: '03',
+      icon: '→',
+      title: 'Render & Dominate',
+      desc: 'Review draft edits with frame-accurate links. Once approved, we deliver the master files in a tap.'
     }
   ];
 
@@ -205,7 +236,7 @@ export default function App() {
     {
       id: 2,
       title: 'HALO PROMO',
-      category: 'Commercial',
+      category: 'Brand Commercial',
       tag: 'VFX & Color Grading',
       image: 'https://cdn.prod.website-files.com/69e1af55cd74a45f4117081c/69e1f544419bf0fcfa672549_rectangle_52%20(3).webp'
     },
@@ -219,104 +250,27 @@ export default function App() {
     {
       id: 4,
       title: 'VERTEX SHOTS',
-      category: 'YouTube Vlogs',
-      tag: 'Ambient Grading',
+      category: 'YouTube Vlog',
+      tag: 'Ambient Film Grading',
       image: 'https://cdn.prod.website-files.com/69e1af55cd74a45f4117081c/69e5990498f8925988514684_Pastel%20Knit%20Portrait.png'
     },
     {
       id: 5,
       title: 'ORBIT CORE',
       category: 'Brand Anthem',
-      tag: 'Commercial Grade',
+      tag: 'Heavy Soundscapes',
       image: 'https://cdn.prod.website-files.com/69e1af55cd74a45f4117081c/69e59953b55fe4b963810a36_Glowing%20Pink%20Blossoms.png'
     },
     {
       id: 6,
       title: 'AETHER CUTS',
       category: 'Cinematic Reel',
-      tag: 'Sound Design Finish',
+      tag: 'Pacing Strategy',
       image: 'https://cdn.prod.website-files.com/69e1af55cd74a45f4117081c/69e599b187d88393eca45f91_Boxer%20in%20Action.png'
     }
   ];
 
-  const processes = [
-    {
-      num: '01',
-      title: 'Discovery & Brief',
-      desc: 'We start by aligning with your brand identity, pacing requirements, channels reference, and B-roll files.'
-    },
-    {
-      num: '02',
-      title: 'Structural Rough Cut',
-      desc: 'We assemble the best takes, pacing them cleanly to construct a highly engaging, retention-focused foundation.'
-    },
-    {
-      num: '03',
-      title: 'Dynamic Overlays',
-      desc: 'We integrate key captions, infographics, zooms, text tracking, and visual assets to hook user focus.'
-    },
-    {
-      num: '04',
-      title: 'Sound Design Finish',
-      desc: 'Apply custom audio enhancement, background scores, foley cuts, and SFX layers to keep viewers listening.'
-    },
-    {
-      num: '05',
-      title: 'Review & Revisions',
-      desc: 'We host interactive review streams to get your direct feedback, updating assets in quick feedback loops.'
-    },
-    {
-      num: '06',
-      title: 'Final Master Delivery',
-      desc: 'Export the clean edit at high render formats (ProRes/MP4), ready to upload and drive organic growth.'
-    }
-  ];
-
-  const testimonials = [
-    {
-      quote: "The retention on our YouTube cuts jumped from 35% to 58% in the first week. Prime Edits completely transformed our pacing structure.",
-      author: "Aditya Magdum",
-      role: "Founder, Magdum Infra",
-      image: "https://cdn.prod.website-files.com/69afdc27b122b092c4b692ca/69e1dc1c9cd84fc00ac771b9_rectangle_27%20(4).webp"
-    },
-    {
-      quote: "Outstanding speed and aesthetic grading. They understood our brand vision and delivered promos that outperformed all our paid campaigns.",
-      author: "Vedant Sutar",
-      role: "Founder, Sutar Motors",
-      image: "https://cdn.prod.website-files.com/69afdc27b122b092c4b692ca/69e1dc1bdfd09ef94be9178c_rectangle_27%20(6).webp"
-    },
-    {
-      quote: "Amazing Captions and vertical layouts. Our Reels are regularly hitting the explore page and driving thousands of new organic followers.",
-      author: "Shravani D.",
-      role: "Founder, Pulse Beats",
-      image: "https://cdn.prod.website-files.com/69afdc27b122b092c4b692ca/69e1dc1b4ba4ba2059820bd8_rectangle_27%20(5).webp"
-    },
-    {
-      quote: "Great soundscapes and infographical elements. They masterfully took complex files and made a polished summary video.",
-      author: "Chinmay Babar",
-      role: "Founder, NoWap",
-      image: "https://cdn.prod.website-files.com/69afdc27b122b092c4b692ca/69e1dc1bce56233410b70cd2_rectangle_27%20(7).webp"
-    }
-  ];
-
-  const faqs = [
-    {
-      q: "How long does editing take?",
-      a: "Standard turnarounds are 24-48 hours for Short-form content (Reels/Shorts) and 3-5 business days for longer-form YouTube videos or Promotional campaigns, depending on complexity."
-    },
-    {
-      q: "How many revisions are included?",
-      a: "We include 2 rounds of revisions for the Basic package, 5 for Standard, and Unlimited revisions for our Premium tier. We want to make sure you get exactly the video you envisioned."
-    },
-    {
-      q: "What file formats do you accept?",
-      a: "We accept all standard video formats, including MP4, MOV, AVI, ProRes, and RAW camera files. You can upload directly via our client portal or send links from Google Drive/Dropbox."
-    },
-    {
-      q: "How do payments work?",
-      a: "For project-based contracts, we require a 50% deposit upfront and 50% upon final approval before watermarks are removed. Monthly retainers are billed at the beginning of each billing cycle."
-    }
-  ];
+  const highlightWords = ["Pacing", "Hooks", "Narrative", "Grading", "SFX Mix", "Retention"];
 
   return (
     <>
@@ -326,458 +280,790 @@ export default function App() {
       {/* 2. Custom Cursor Follower */}
       {preloaderDone && <CustomCursor />}
 
-      <div className={`page-wrap bg-black min-h-screen text-white overflow-hidden font-sans select-none transition-opacity duration-500 ${preloaderDone ? 'opacity-100' : 'opacity-0'}`}>
+      <div className={`page-wrap bg-[#04050a] min-h-screen text-white select-none transition-opacity duration-500 ${preloaderDone ? 'opacity-100' : 'opacity-0'}`}>
 
-        {/* 3. Header Navbar */}
-        <header className="navbar fixed top-0 left-0 w-full z-50 transition-all duration-300">
-          <div className="container-navbar mx-auto px-6 md:px-12 h-20 flex items-center justify-between border-b border-[#1a1a24] bg-black/60 backdrop-blur-md">
-
-            <a href="#hero" className="brand flex items-center gap-2.5">
-              <img src="/logo.svg" alt="Prime Edits Logo" className="h-8 w-auto filter drop-shadow-[0_0_8px_rgba(255,87,34,0.2)]" />
-              <span className="font-sans font-black tracking-widest text-base text-white uppercase">PRIME EDITS</span>
+        {/* 3. Header Navbar (Frosted & Animated) */}
+        <header 
+          ref={headerRef} 
+          className={`fixed inset-x-0 top-0 z-50 flex justify-center px-4 pt-4 transition-all duration-500`}
+        >
+          <nav 
+            className={`flex w-full max-w-5xl items-center justify-between gap-4 rounded-full px-6 py-3 transition-all duration-500 ${
+              scrolled 
+                ? 'glass-strong border-white/10 bg-black/45 shadow-[0_30px_60px_-30px_rgba(0,0,0,0.85)]' 
+                : 'border-transparent bg-transparent'
+            }`}
+          >
+            <a className="text-xl tracking-wider select-none font-bebas flex items-center gap-2" href="#top">
+              <span className="inline-block leading-none tracking-widest text-white">
+                PRIME EDITS<span className="text-[var(--color-cyan)]">.</span>
+              </span>
             </a>
-
+            
             {/* Desktop Navigation Links */}
-            <nav className="nav-menu hidden md:flex items-center gap-8 font-sans text-xs uppercase tracking-widest font-semibold text-gray-400">
-              <a href="#hero" className="hover:text-white transition-colors">Home</a>
-              <a href="#about-us" className="hover:text-white transition-colors">About</a>
-              <a href="#service" className="hover:text-white transition-colors">Service</a>
-              <a href="#work" className="hover:text-white transition-colors">Project</a>
-              <a href="#testimonial" className="hover:text-white transition-colors">Testimonial</a>
-            </nav>
-
-            {/* CTA Button */}
-            <div className="hidden md:block">
-              <a href="#contact" className="button-primary text-xs uppercase tracking-wider font-bold">
-                Get Started
-              </a>
+            <div className="hidden items-center gap-8 md:flex">
+              <a href="#how" className="text-xs font-mono uppercase tracking-widest text-fg-dim transition-colors hover:text-fg">How it works</a>
+              <a href="#showcase" className="text-xs font-mono uppercase tracking-widest text-fg-dim transition-colors hover:text-fg">Showcase</a>
+              <a href="#features" className="text-xs font-mono uppercase tracking-widest text-fg-dim transition-colors hover:text-fg">Features</a>
+              <a href="#styles" className="text-xs font-mono uppercase tracking-widest text-fg-dim transition-colors hover:text-fg">Styles</a>
+              <a href="#channels" className="text-xs font-mono uppercase tracking-widest text-fg-dim transition-colors hover:text-fg">Platforms</a>
             </div>
 
-            {/* Mobile Menu Toggle */}
-            <button
-              onClick={() => setMenuOpen(!menuOpen)}
-              className="menu-toggle md:hidden flex flex-col justify-center items-end gap-1.5 w-6 h-6 focus:outline-none"
-            >
-              <span className={`w-6 h-0.5 bg-white transition-transform ${menuOpen ? 'rotate-45 translate-y-2' : ''}`} />
-              <span className={`w-4 h-0.5 bg-white transition-opacity ${menuOpen ? 'opacity-0' : ''}`} />
-              <span className={`w-6 h-0.5 bg-white transition-transform ${menuOpen ? '-rotate-45 -translate-y-2' : ''}`} />
-            </button>
-          </div>
+            {/* CTA Link */}
+            <div className="flex items-center gap-2">
+              <a href="#contact" className="btn btn-primary h-9 px-5 text-xs uppercase tracking-wider font-semibold hidden sm:inline-flex cursor-pointer">
+                Get Started
+              </a>
+              
+              {/* Mobile Navigation Toggle Button */}
+              <button 
+                aria-label="Menu" 
+                onClick={() => setMenuOpen(!menuOpen)}
+                className="grid h-9 w-9 place-items-center rounded-full border border-white/15 md:hidden cursor-pointer"
+              >
+                <div className="space-y-1">
+                  <span className={`block h-0.5 w-4 bg-white transition-transform duration-300 ${menuOpen ? 'rotate-45 translate-y-1.5' : ''}`}></span>
+                  <span className={`block h-0.5 w-4 bg-white transition-opacity duration-300 ${menuOpen ? 'opacity-0' : ''}`}></span>
+                  <span className={`block h-0.5 w-4 bg-white transition-transform duration-300 ${menuOpen ? '-rotate-45 -translate-y-1.5' : ''}`}></span>
+                </div>
+              </button>
+            </div>
+          </nav>
 
           {/* Mobile Overlay Menu */}
-          <div className={`nav-menu-phone fixed top-20 left-0 w-full h-[calc(100vh-80px)] bg-black/95 backdrop-blur-lg border-t border-[#1a1a24] transition-all duration-500 z-40 ${menuOpen ? 'translate-x-0 opacity-100' : 'translate-x-full opacity-0'}`}>
-            <nav className="flex flex-col p-8 gap-6 text-xl uppercase font-extrabold tracking-widest text-center">
-              <a href="#hero" onClick={() => setMenuOpen(false)} className="hover:text-[#ff5722] py-4 border-b border-[#1a1a24]">Home</a>
-              <a href="#about-us" onClick={() => setMenuOpen(false)} className="hover:text-[#ff5722] py-4 border-b border-[#1a1a24]">About</a>
-              <a href="#service" onClick={() => setMenuOpen(false)} className="hover:text-[#ff5722] py-4 border-b border-[#1a1a24]">Service</a>
-              <a href="#work" onClick={() => setMenuOpen(false)} className="hover:text-[#ff5722] py-4 border-b border-[#1a1a24]">Project</a>
-              <a href="#testimonial" onClick={() => setMenuOpen(false)} className="hover:text-[#ff5722] py-4 border-b border-[#1a1a24]">Testimonial</a>
-              <a href="#contact" onClick={() => setMenuOpen(false)} className="button-primary py-4 mt-8 w-full text-center">Get Started</a>
+          <div 
+            className={`fixed inset-x-0 top-[76px] mx-4 rounded-3xl border border-white/15 bg-black/95 backdrop-blur-xl p-6 transition-all duration-500 z-40 md:hidden ${
+              menuOpen ? 'opacity-100 translate-y-0 scale-100' : 'opacity-0 -translate-y-4 scale-95 pointer-events-none'
+            }`}
+          >
+            <nav className="flex flex-col gap-5 text-sm font-mono uppercase tracking-widest text-center">
+              <a href="#how" onClick={() => setMenuOpen(false)} className="py-2 hover:text-[var(--color-cyan)] border-b border-white/5">How it works</a>
+              <a href="#showcase" onClick={() => setMenuOpen(false)} className="py-2 hover:text-[var(--color-cyan)] border-b border-white/5">Showcase</a>
+              <a href="#features" onClick={() => setMenuOpen(false)} className="py-2 hover:text-[var(--color-cyan)] border-b border-white/5">Features</a>
+              <a href="#styles" onClick={() => setMenuOpen(false)} className="py-2 hover:text-[var(--color-cyan)] border-b border-white/5">Styles</a>
+              <a href="#channels" onClick={() => setMenuOpen(false)} className="py-2 hover:text-[var(--color-cyan)] border-b border-white/5">Platforms</a>
+              <a href="#contact" onClick={() => setMenuOpen(false)} className="btn btn-primary h-11 w-full py-3 mt-4 text-xs font-semibold cursor-pointer">Get Started</a>
             </nav>
           </div>
         </header>
 
-        {/* 4. Hero Section */}
-        <section id="hero" className="section hero-section home relative w-full h-screen flex items-center justify-center bg-black overflow-hidden select-none">
-          <div className="absolute inset-0 bg-black/40 z-[2]" />
+        <main id="top">
+          {/* 4. Hero Section with shader background */}
+          <section className="relative isolate min-h-[100svh] overflow-hidden pt-28 flex items-center">
+            {/* Background Shader & Repeating Grids */}
+            <WebGLBackground className="absolute inset-0 -z-10" />
+            <div className="bg-grid pointer-events-none absolute inset-0 -z-[5]"></div>
 
-          {/* Parallax Background Image */}
-          <img
-            src="/hero-bg.png"
-            alt="Hero Background"
-            className="absolute inset-0 w-full h-full object-cover opacity-50 scale-105 select-none pointer-events-none"
-          />
 
-          {/* Mouse-move Image Trail Container */}
-          <HeroImageTrail />
-
-          {/* Hero Content Text */}
-          <div ref={heroTextRef} className="container mx-auto px-6 md:px-12 z-[3] flex flex-col items-center text-center relative select-none">
-            <h1 className="text-[12vw] leading-none font-sans font-black tracking-tighter text-white select-none pointer-events-none">
-              PRIME EDITS
-            </h1>
-            <p className="max-w-xl text-xs md:text-sm text-gray-400 font-mono tracking-wider mt-6 leading-relaxed select-none pointer-events-none uppercase">
-              // We create high-retention video cuts and cinematic visual content that help ambitious creators stand out through bold design, fast pacing, and sound design intensity.
-            </p>
-          </div>
-        </section>
-
-        {/* 5. About Us Section */}
-        <section id="about-us" className="section section-padding bg-black border-t border-[#1a1a24] py-24 md:py-36">
-          <div className="container mx-auto px-6 md:px-12">
-            <div className="about-us-contain flex flex-col md:flex-row md:items-start justify-between gap-12">
-
-              {/* Left Column: Heading and Tag */}
-              <div className="w-full md:w-1/2 flex flex-col gap-6">
-                <div className="section-tag flex items-center gap-2 text-xs uppercase tracking-widest text-[#ff5722] font-mono">
-                  <div className="w-2 h-2 rounded-full bg-[#ff5722]" />
-                  <span>About Us</span>
+            <div className="mx-auto grid max-w-6xl grid-cols-1 items-center gap-12 px-6 pb-20 pt-10 lg:grid-cols-[1.15fr_0.85fr]">
+              <div className="text-center lg:text-left select-none">
+                {/* Announcement tag */}
+                <div className="hero-animate-badge mb-6 inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-4 py-1.5 backdrop-blur-md">
+                  <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-[var(--color-cyan)]"></span>
+                  <span className="text-[10px] font-mono tracking-widest text-fg-dim uppercase">YouTube · Instagram Reels · Promos</span>
                 </div>
-                <h2 ref={revealTextRef} className="text-3xl md:text-5xl font-black font-sans uppercase leading-tight tracking-tight text-white select-none">
-                  <ScrollRevealText text="Prime Edits is a premium post-production studio crafting bold, high-retention video assets with strategic pacing and refined edit signatures." />
-                </h2>
-              </div>
-
-              {/* Right Column: Paragraph and Overlapping Grid */}
-              <div className="w-full md:w-5/12 flex flex-col gap-10">
-                <p className="text-sm md:text-base text-gray-500 font-mono leading-relaxed uppercase">
-                  Crafting scalable editing workflows that combine pacing strategy, custom color grading, and heavy soundscapes to elevate visual creators and drive meaningful channel growth.
+                
+                {/* Hero Title */}
+                <h1 className="hero-animate-title h-display text-[clamp(2.8rem,9vw,6rem)] select-none uppercase leading-[0.85]">
+                  <span className="mr-[0.16em] inline-block text-gradient">video</span>
+                  <span className="mr-[0.16em] inline-block text-gradient">edits</span>
+                  <br className="hidden sm:inline" />
+                  <span className="mr-[0.16em] inline-block text-gradient">that</span>
+                  <span className="mr-[0.16em] inline-block text-accent-gradient">retain</span>
+                </h1>
+                
+                <p className="hero-animate-text mx-auto mt-6 max-w-md text-balance text-sm sm:text-base text-fg-dim lg:mx-0 font-mono tracking-wide leading-relaxed uppercase">
+                  // We craft high-retention post-production packages combining fast paced storytelling, dynamic infographics, and color grades that hook user focus.
                 </p>
 
-                {/* Xenith Overlapping Image Layout */}
-                <div className="about-image-wrapper flex items-end gap-6 self-start relative mt-4">
-                  <div className="about-image-left shrink-0">
-                    <img
-                      src="https://cdn.prod.website-files.com/69afdc27b122b092c4b692ca/69e1a5aa196cd4a6b598dbf9_rectangle_32.webp"
-                      loading="lazy"
-                      width="160"
-                      height="210"
-                      alt="Grid 1"
-                      className="about-image small border border-[#1a1a24] object-cover scale-95"
-                    />
+                {/* Hero input submit Waitlist style */}
+                <div className="hero-animate-cta mt-9 flex flex-col items-center gap-4 lg:items-start">
+                  <div className="w-full max-w-md">
+                    <form onSubmit={handleHeroEmailSubmit} className="flex flex-col gap-2 sm:flex-row">
+                      <div className="glass flex flex-1 items-center rounded-full px-2 py-1.5 border border-white/5 focus-within:border-white/20">
+                        <input 
+                          type="email" 
+                          placeholder="you@email.com" 
+                          required
+                          value={heroEmail}
+                          onChange={(e) => setHeroEmail(e.target.value)}
+                          className="w-full bg-transparent px-4 py-2 text-sm text-white placeholder:text-fg-faint focus:outline-none font-mono" 
+                          aria-label="Email address" 
+                        />
+                      </div>
+                      <button type="submit" className="btn btn-primary h-[48px] px-6 text-xs uppercase font-semibold cursor-pointer">
+                        Get Started
+                      </button>
+                    </form>
                   </div>
-                  <div className="about-image-right shrink-0">
-                    <img
-                      src="https://cdn.prod.website-files.com/69afdc27b122b092c4b692ca/69e1a5aa0624c74b1cb65e01_rectangle_33.webp"
-                      loading="lazy"
-                      width="180"
-                      height="230"
-                      alt="Grid 2"
-                      className="about-image large border border-[#1a1a24] object-cover"
-                    />
+                  <div className="flex items-center gap-2">
+                    <span className="text-[10px] font-mono text-fg-faint uppercase">Free first edit trial for channels over 50k subscribers</span>
                   </div>
                 </div>
               </div>
 
-            </div>
-          </div>
-        </section>
-
-        {/* 6. Sticky Scrolling Services Section */}
-        <section ref={serviceSectionRef} id="service" className="section service-section relative w-full h-screen bg-black">
-          <div className="relative w-full h-full overflow-hidden flex flex-col md:flex-row border-t border-[#1a1a24]">
-
-            {/* Background overlapping images panel (Left side) */}
-            <div className="w-full md:w-1/2 h-1/2 md:h-full relative overflow-hidden bg-zinc-950">
-              {services.map((service, idx) => (
-                <img
-                  key={idx}
-                  src={service.image}
-                  alt={service.title}
-                  className={`absolute inset-0 w-full h-full object-cover transition-opacity duration-700 ease-in-out ${idx === activeServiceIndex ? 'opacity-50 scale-100' : 'opacity-0 scale-95'}`}
-                />
-              ))}
-              <div className="absolute inset-0 bg-gradient-to-t md:bg-gradient-to-r from-black via-black/40 to-transparent z-[2]" />
-            </div>
-
-            {/* Content list panel (Right side) */}
-            <div className="w-full md:w-1/2 h-1/2 md:h-full flex flex-col justify-center p-8 md:p-20 bg-black z-10">
-              <div className="section-tag flex items-center gap-2 text-xs uppercase tracking-widest text-[#ff5722] font-mono mb-8">
-                <div className="w-2 h-2 rounded-full bg-[#ff5722]" />
-                <span>Our Services</span>
-              </div>
-
-              {/* Service Details with smooth transitions */}
-              <div className="relative h-[250px] md:h-[300px]">
-                {services.map((service, idx) => (
-                  <div
-                    key={idx}
-                    className={`absolute inset-0 flex flex-col justify-start transition-all duration-500 ${idx === activeServiceIndex ? 'opacity-100 translate-y-0 scale-100 pointer-events-auto' : 'opacity-0 translate-y-10 scale-95 pointer-events-none'}`}
-                  >
-                    <span className="font-mono text-xs text-zinc-600 tracking-wider mb-2">{service.tag}</span>
-                    <h3 className="text-3xl md:text-5xl font-black uppercase tracking-tight text-white mb-6">
-                      {service.title}
-                    </h3>
-                    <p className="max-w-md text-sm md:text-base text-gray-500 font-mono leading-relaxed uppercase">
-                      {service.desc}
-                    </p>
-                  </div>
-                ))}
-              </div>
-
-              {/* Dots Progress indicators */}
-              <div className="flex gap-3 mt-8">
-                {services.map((_, idx) => (
-                  <div
-                    key={idx}
-                    className={`h-1.5 transition-all duration-300 rounded-full ${idx === activeServiceIndex ? 'w-8 bg-[#ff5722]' : 'w-2 bg-zinc-800'}`}
-                  />
-                ))}
-              </div>
-            </div>
-
-          </div>
-        </section>
-
-        {/* 7. Horizontal Scroll Latest Projects Section */}
-        <section ref={workSectionRef} id="work" className="section relative w-full h-screen bg-black">
-          <div className="relative w-full h-full flex flex-col justify-center overflow-hidden border-t border-[#1a1a24]">
-
-            {/* Header section tag and title */}
-            <div className="container mx-auto px-6 md:px-12 pt-24 shrink-0">
-              <div className="section-tag flex items-center gap-2 text-xs uppercase tracking-widest text-[#ff5722] font-mono mb-4">
-                <div className="w-2 h-2 rounded-full bg-[#ff5722]" />
-                <span>Our Work</span>
-              </div>
-              <h2 className="text-4xl md:text-6xl font-black font-sans uppercase tracking-tight text-white mb-12">
-                Latest Projects
-              </h2>
-            </div>
-
-            {/* Horizontal Track container */}
-            <div ref={trackRef} className="flex gap-8 px-6 md:px-12 items-center w-max h-[420px] md:h-[480px]">
-
-              {portfolioProjects.map((project, idx) => (
-                <div
-                  key={project.id}
-                  className="work-card relative w-[320px] md:w-[420px] h-full bg-[#0a0a0d] border border-[#1a1a24] overflow-hidden group shrink-0"
-                  data-cursor
-                  data-cursor-text="Play Video"
-                >
-                  {/* Hover visual scale effect */}
-                  <div className="w-full h-2/3 overflow-hidden border-b border-[#1a1a24]">
-                    <img
-                      src={project.image}
-                      alt={project.title}
-                      className="w-full h-full object-cover transition-transform duration-700 ease-out group-hover:scale-110 group-hover:rotate-1"
-                    />
+              {/* Hero Right Visual Mockup (SVG + CSS editor timeline) */}
+              <div className="hero-animate-mockup select-none pointer-events-none z-10 flex justify-center">
+                <div className="relative w-[280px] sm:w-[320px] aspect-[9/16] glass rounded-[36px] p-3.5 shadow-3xl border border-white/10 flex flex-col justify-between overflow-hidden">
+                  <div className="absolute -inset-10 -z-10 rounded-[60px] opacity-40 blur-3xl bg-gradient-to-tr from-[var(--color-accent)] to-[var(--color-cyan)]"></div>
+                  
+                  {/* Top phone bar */}
+                  <div className="flex justify-between items-center px-4 pt-1 font-mono text-[9px] text-fg-dim">
+                    <span>9:41</span>
+                    <div className="w-14 h-4 rounded-full bg-black/60 border border-white/5 flex items-center justify-center">
+                      <div className="w-2 h-2 rounded-full bg-zinc-800"></div>
+                    </div>
+                    <span>5G</span>
                   </div>
 
-                  <div className="p-6 h-1/3 flex flex-col justify-between">
-                    <div>
-                      <span className="font-mono text-[10px] text-zinc-600 uppercase tracking-widest block mb-1">
-                        {project.category}
-                      </span>
-                      <h4 className="text-xl font-bold font-sans uppercase tracking-wide text-white group-hover:text-[#ff5722] transition-colors">
-                        {project.title}
+                  {/* Mock Video player container */}
+                  <div className="flex-1 my-3 rounded-2xl bg-zinc-950 border border-white/5 overflow-hidden relative flex flex-col justify-end p-4">
+                    {/* Background mock grad */}
+                    <div className="absolute inset-0 bg-gradient-to-b from-[#141a29]/30 to-[#04050a] z-0"></div>
+                    
+                    {/* SVG Graphic illustrating a cut */}
+                    <div className="absolute inset-0 flex items-center justify-center opacity-85 z-0">
+                      <svg width="100%" height="100%" viewBox="0 0 200 300">
+                        <defs>
+                          <radialGradient id="mockGlow" cx="50%" cy="50%" r="50%">
+                            <stop offset="0%" stopColor="#3a86ff" stopOpacity="0.45" />
+                            <stop offset="100%" stopColor="#04050a" stopOpacity="0" />
+                          </radialGradient>
+                        </defs>
+                        <rect width="200" height="300" fill="url(#mockGlow)" />
+                        {/* Audio visualizer */}
+                        <g transform="translate(10, 150)">
+                          {Array.from({ length: 18 }).map((_, idx) => {
+                            const h = 10 + Math.sin(idx * 0.7) * 20;
+                            return (
+                              <rect 
+                                key={idx} 
+                                x={idx * 10} 
+                                y={-h / 2} 
+                                width="3.5" 
+                                height={h} 
+                                rx="1.5" 
+                                fill={idx < 10 ? "var(--color-cyan)" : "rgba(255, 255, 255, 0.12)"} 
+                              />
+                            );
+                          })}
+                        </g>
+                      </svg>
+                    </div>
+
+                    {/* Captions mockup inside player */}
+                    <div className="relative z-10 w-full text-center space-y-2 mb-2">
+                      <div className="inline-block glass px-3 py-1 rounded-lg border border-white/10">
+                        <span className="text-[10px] font-mono text-[var(--color-cyan)] uppercase tracking-wide">0.24s · keyframe active</span>
+                      </div>
+                      <h4 className="font-bebas text-3xl uppercase leading-none tracking-wide text-white text-shadow">
+                        ye edit next <span className="text-accent-gradient">LEVEL</span> hai 🔥
                       </h4>
                     </div>
-
-                    <div className="flex justify-between items-center text-[10px] font-mono text-gray-500 uppercase">
-                      <span>{project.tag}</span>
-                      <ArrowUpRight className="w-4 h-4 text-zinc-600 group-hover:text-[#ff5722] transition-colors" />
-                    </div>
                   </div>
-                </div>
-              ))}
 
-              {/* Xenith CTA Ending card inside horizontal scroll */}
-              <div className="cta-card-wrapper w-[320px] md:w-[420px] h-full flex flex-col justify-center items-center p-8 bg-[#0a0a0d] border border-dashed border-[#ff5722]/30 shrink-0 select-none">
-                <p className="text-center font-sans font-black text-2xl md:text-3xl uppercase tracking-tighter mb-6">
-                  Got a creative brief?
-                </p>
-                <a href="#contact" className="button-primary text-xs uppercase tracking-wider font-bold">
-                  Let's Talk
-                </a>
-              </div>
-
-            </div>
-          </div>
-        </section>
-
-        {/* 8. Process Section */}
-        <section id="how-we-work" className="section section-padding bg-black border-t border-[#1a1a24] py-24 md:py-36">
-          <div className="container mx-auto px-6 md:px-12">
-            <div className="section-contain flex flex-col gap-16">
-
-              <div className="header-section">
-                <div className="section-tag flex items-center gap-2 text-xs uppercase tracking-widest text-[#ff5722] font-mono mb-4">
-                  <div className="w-2 h-2 rounded-full bg-[#ff5722]" />
-                  <span>How We Work</span>
-                </div>
-                <h2 className="text-3xl md:text-5xl font-black font-sans uppercase tracking-tight text-white">
-                  Our Edit Process
-                </h2>
-              </div>
-
-              {/* Process Cards layout matching Xenith minus/plus reveal */}
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                {processes.map((proc, idx) => (
-                  <div
-                    key={idx}
-                    onMouseEnter={() => setActiveProcessIndex(idx)}
-                    className={`process-card p-8 border bg-[#0a0a0d] transition-all duration-300 flex flex-col gap-6 cursor-pointer ${activeProcessIndex === idx ? 'border-[#ff5722] bg-[#ff5722]/5' : 'border-[#1a1a24]'
-                      }`}
-                  >
-                    <div className="process-header-wrap flex justify-between items-center">
-                      <span className="font-mono text-xs text-[#ff5722] font-bold">{proc.num}</span>
-                      <div className="process-icon-wrapper text-zinc-600 transition-colors">
-                        {activeProcessIndex === idx ? (
-                          <Minus className="w-4 h-4 text-[#ff5722]" />
-                        ) : (
-                          <Plus className="w-4 h-4" />
-                        )}
+                  {/* Mock Video timeline controller */}
+                  <div className="h-28 rounded-2xl bg-black/60 border border-white/5 p-3 flex flex-col justify-between font-mono text-[9px] text-fg-dim">
+                    <div className="flex justify-between items-center border-b border-white/5 pb-1.5">
+                      <span className="text-[8px] text-[var(--color-cyan)] uppercase">editing tracks</span>
+                      <span>00:12:04</span>
+                    </div>
+                    {/* Multitrack track segments */}
+                    <div className="space-y-1.5 mt-2">
+                      <div className="h-3 rounded bg-[var(--color-accent)]/20 border border-[var(--color-accent)]/35 relative overflow-hidden">
+                        <div className="h-full bg-[var(--color-accent)] w-3/5 rounded-l"></div>
+                        <div className="absolute right-3 top-0 h-full w-0.5 bg-white"></div>
+                      </div>
+                      <div className="h-3 rounded bg-[var(--color-cyan)]/25 border border-[var(--color-cyan)]/35 relative overflow-hidden">
+                        <div className="h-full bg-[var(--color-cyan)] w-[45%] rounded-l"></div>
                       </div>
                     </div>
-
-                    <h3 className="text-lg font-bold font-sans uppercase tracking-wide text-white">
-                      {proc.title}
-                    </h3>
-
-                    <p className={`text-xs text-gray-500 font-mono leading-relaxed transition-all duration-300 uppercase ${activeProcessIndex === idx ? 'opacity-100 max-h-40' : 'opacity-40'
-                      }`}>
-                      {proc.desc}
-                    </p>
                   </div>
-                ))}
-              </div>
-
-            </div>
-          </div>
-        </section>
-
-        {/* 9. Testimonial Section */}
-        <section id="testimonial" className="section section-padding bg-black border-t border-[#1a1a24] py-24 md:py-36">
-
-          {/* Continuous Ticker marquee banner */}
-          <div className="marquee-container w-full select-none overflow-hidden mb-16">
-            <div className="marquee-content flex">
-              {[...Array(3)].map((_, loopIdx) => (
-                <div key={loopIdx} className="flex shrink-0">
-                  <span className="marquee-item">High Retention</span>
-                  <span className="marquee-item marquee-item-highlight">Design Excellence</span>
-                  <span className="marquee-item">Cinematic Grading</span>
-                  <span className="marquee-item marquee-item-highlight">Pacing Strategy</span>
                 </div>
+              </div>
+            </div>
+
+            {/* Bottom transition gradient fade */}
+            <div className="pointer-events-none absolute inset-x-0 bottom-0 h-40 bg-gradient-to-b from-transparent to-[#04050a]"></div>
+          </section>
+
+          {/* 5. How It Works Section */}
+          <section id="how" className="relative mx-auto max-w-5xl px-6 py-24 sm:py-32">
+            <div className="mx-auto max-w-2xl text-center">
+              <ScrollReveal>
+                <span className="kicker">How it works</span>
+              </ScrollReveal>
+              <ScrollReveal delay={100}>
+                <h2 className="h-display mt-4 text-[clamp(2.2rem,5.5vw,4.5rem)] text-gradient uppercase">Three steps to <span className="text-accent-gradient">viral</span></h2>
+              </ScrollReveal>
+              <ScrollReveal delay={200}>
+                <p className="mt-4 text-fg-dim mx-auto max-w-lg text-sm sm:text-base font-mono uppercase tracking-wide">// From raw files to high retention master cuts — zero friction.</p>
+              </ScrollReveal>
+            </div>
+
+            <div className="mt-16 grid gap-6 md:grid-cols-3">
+              {editSteps.map((step, idx) => (
+                <ScrollReveal key={idx} delay={idx * 150}>
+                  <div className="glass group relative flex flex-col justify-between overflow-hidden rounded-3xl p-7 min-h-[220px] how-card">
+                    {/* Glowing background card hover spot */}
+                    <div className="pointer-events-none absolute -right-10 -top-10 h-40 w-40 rounded-full opacity-0 blur-2xl transition-opacity duration-500 group-hover:opacity-100" style={{ background: 'radial-gradient(circle, rgba(58,134,255,0.4), transparent 70%)' }}></div>
+                    
+                    <div className="flex items-start justify-between">
+                      <span className="font-mono text-sm text-[var(--color-cyan)]">{step.num}</span>
+                      <span className="grid h-9 w-9 place-items-center rounded-full border border-white/10 text-sm text-white how-icon">{step.icon}</span>
+                    </div>
+
+                    <div className="mt-8">
+                      <h3 className="font-bebas text-2xl tracking-widest text-white uppercase">{step.title}</h3>
+                      <p className="mt-2.5 text-xs sm:text-sm text-fg-dim font-mono leading-relaxed uppercase">{step.desc}</p>
+                    </div>
+                  </div>
+                </ScrollReveal>
               ))}
             </div>
-          </div>
+          </section>
 
-          <div className="container mx-auto px-6 md:px-12">
-            <div className="section-contain flex flex-col gap-12">
-
-              <div className="header-section flex flex-col gap-4">
-                <div className="section-tag flex items-center gap-2 text-xs uppercase tracking-widest text-[#ff5722] font-mono">
-                  <div className="w-2 h-2 rounded-full bg-[#ff5722]" />
-                  <span>Testimonial</span>
+          {/* 6. Showcase Section (Interactive Carousel) */}
+          <section id="showcase" className="relative overflow-hidden py-24 sm:py-32">
+            <div className="mx-auto max-w-5xl px-6">
+              <div className="flex items-end justify-between gap-6">
+                <div className="max-w-xl">
+                  <ScrollReveal>
+                    <span className="kicker">In action</span>
+                  </ScrollReveal>
+                  <ScrollReveal delay={100}>
+                    <h2 className="h-display mt-4 text-[clamp(2.2rem,5.5vw,4.5rem)] text-gradient uppercase">See it <span className="text-accent-gradient">in action</span></h2>
+                  </ScrollReveal>
+                  <ScrollReveal delay={200}>
+                    <p className="mt-4 text-fg-dim text-sm sm:text-base font-mono uppercase tracking-wide">// Frame cuts from recent clients. High retention metrics across formats.</p>
+                  </ScrollReveal>
                 </div>
-                <h2 className="text-3xl md:text-5xl font-black font-sans uppercase tracking-tight text-white">
-                  What Clients Say
-                </h2>
-              </div>
-
-              {/* Testimonials Grid stacking */}
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                {testimonials.map((testi, idx) => (
-                  <div
-                    key={idx}
-                    className="testimonial-card flex flex-col justify-between p-8 md:p-10 bg-[#0a0a0d] border border-[#1a1a24] transition-all duration-300 hover:border-zinc-700"
+                
+                {/* Navigation Buttons for Carousel */}
+                <div className="hidden shrink-0 gap-3 md:flex font-mono">
+                  <button 
+                    onClick={() => handleCarouselScroll('left')} 
+                    aria-label="Previous" 
+                    className="grid h-10 w-10 place-items-center rounded-full border border-white/15 text-white transition-all duration-300 hover:scale-105 hover:border-[var(--color-cyan)] hover:text-[var(--color-cyan)] cursor-pointer"
                   >
-                    <p className="text-base md:text-lg font-sans leading-relaxed text-zinc-300 italic mb-10 select-text">
-                      "{testi.quote}"
-                    </p>
+                    <ArrowLeft className="w-4 h-4" />
+                  </button>
+                  <button 
+                    onClick={() => handleCarouselScroll('right')} 
+                    aria-label="Next" 
+                    className="grid h-10 w-10 place-items-center rounded-full border border-white/15 text-white transition-all duration-300 hover:scale-105 hover:border-[var(--color-cyan)] hover:text-[var(--color-cyan)] cursor-pointer"
+                  >
+                    <ArrowRight className="w-4 h-4" />
+                  </button>
+                </div>
+              </div>
+            </div>
 
-                    <div className="testi-profile flex items-center gap-4">
-                      <div className="w-10 h-10 rounded-full border border-[#1a1a24] overflow-hidden shrink-0">
-                        <img src={testi.image} alt={testi.author} className="w-full h-full object-cover" />
-                      </div>
-                      <div className="flex flex-col">
-                        <span className="text-xs font-bold text-white uppercase tracking-wider">{testi.author}</span>
-                        <span className="font-mono text-[9px] text-zinc-500 uppercase tracking-widest mt-0.5">{testi.role}</span>
+            {/* Horizontal snaps list */}
+            <div 
+              ref={carouselRef}
+              className="no-scrollbar mt-12 flex snap-x snap-mandatory gap-5 overflow-x-auto px-6 pb-4 [scroll-padding-left:1.5rem] sm:px-[max(1.5rem,calc((100vw-64rem)/2))]"
+            >
+              {portfolioProjects.map((project, idx) => (
+                <ScrollReveal key={project.id} delay={idx * 100} className="shrink-0 snap-start">
+                  <div 
+                    className="relative aspect-[9/16] w-[240px] sm:w-[280px] overflow-hidden rounded-[24px] border border-white/10 shadow-xl group cursor-pointer showcase-card"
+                  >
+                    <img 
+                      alt={project.title} 
+                      loading="lazy" 
+                      className="absolute inset-0 h-full w-full object-cover transition-transform duration-700 ease-out group-hover:scale-105" 
+                      src={project.image}
+                    />
+                    {/* Gradient shadow */}
+                    <div className="absolute inset-0 bg-gradient-to-t from-black via-black/30 to-transparent opacity-85"></div>
+                    
+                    {/* Project details card hover display */}
+                    <div className="absolute inset-x-0 bottom-0 p-5 flex flex-col justify-end gap-1 text-left z-10">
+                      <span className="font-mono text-[9px] text-[var(--color-cyan)] uppercase tracking-widest">{project.category}</span>
+                      <h4 className="font-bebas text-2xl uppercase tracking-wide text-white">{project.title}</h4>
+                      <div className="flex justify-between items-center text-[9px] font-mono text-fg-dim uppercase mt-1">
+                        <span>{project.tag}</span>
+                        <ArrowUpRight className="w-3.5 h-3.5 text-fg-faint group-hover:text-[var(--color-cyan)] transition-colors" />
                       </div>
                     </div>
                   </div>
-                ))}
-              </div>
-
-            </div>
-          </div>
-        </section>
-
-        {/* 10. FAQ Section */}
-        <section id="faq" className="section section-padding bg-black border-t border-[#1a1a24] py-24 md:py-36">
-          <div className="container mx-auto px-6 md:px-12">
-            <div className="section-contain flex flex-col md:flex-row md:items-start justify-between gap-12">
-
-              <div className="w-full md:w-1/3 flex flex-col gap-4">
-                <div className="section-tag flex items-center gap-2 text-xs uppercase tracking-widest text-[#ff5722] font-mono">
-                  <div className="w-2 h-2 rounded-full bg-[#ff5722]" />
-                  <span>FAQ</span>
+                </ScrollReveal>
+              ))}
+              
+              {/* Carousel CTA card */}
+              <ScrollReveal delay={portfolioProjects.length * 100} className="shrink-0 snap-start">
+                <div className="relative aspect-[9/16] w-[240px] sm:w-[280px] overflow-hidden rounded-[24px] border border-dashed border-white/20 bg-white/5 p-6 flex flex-col justify-center items-center text-center showcase-card">
+                  <h4 className="font-bebas text-2xl uppercase tracking-wide text-white mb-2">Got a brief?</h4>
+                  <p className="text-xs font-mono text-fg-dim uppercase mb-6 leading-relaxed">Let's craft your custom editing style.</p>
+                  <a href="#contact" className="btn btn-primary h-10 px-5 text-xs font-semibold uppercase tracking-wider cursor-pointer">
+                    Send details
+                  </a>
                 </div>
-                <h2 className="text-3xl md:text-5xl font-black font-sans uppercase tracking-tight text-white">
-                  Key Questions
-                </h2>
-              </div>
+              </ScrollReveal>
+            </div>
+            
+            <p className="mt-4 px-6 text-center font-mono text-[10px] text-fg-faint md:hidden uppercase">← swipe to explore →</p>
+          </section>
 
-              {/* Accordion dropdown stack */}
-              <div className="w-full md:w-7/12 flex flex-col border-b border-[#1a1a24]">
-                {faqs.map((faq, idx) => {
-                  const isOpen = openFaq === idx;
-                  return (
-                    <div key={idx} className="faq-item border-t border-[#1a1a24] overflow-hidden">
-                      <button
-                        onClick={() => setOpenFaq(isOpen ? null : idx)}
-                        className="w-full py-6 flex justify-between items-center text-left text-white focus:outline-none group"
-                      >
-                        <span className="font-bold text-sm md:text-base uppercase tracking-wide group-hover:text-[#ff5722] transition-colors">
-                          {faq.q}
+          <div className="hr-glow mx-auto max-w-5xl"></div>
+
+          {/* 7. Features Section (Bento grid style) */}
+          <section id="features" className="relative mx-auto max-w-5xl px-6 py-24 sm:py-32">
+            <div className="max-w-xl">
+              <ScrollReveal>
+                <span className="kicker">Features</span>
+              </ScrollReveal>
+              <ScrollReveal delay={100}>
+                <h2 className="h-display mt-4 text-[clamp(2.2rem,5.5vw,4.5rem)] text-gradient uppercase">Optimized for <span className="text-accent-gradient">retention</span></h2>
+              </ScrollReveal>
+              <ScrollReveal delay={200}>
+                <p className="mt-4 text-fg-dim text-sm sm:text-base font-mono uppercase tracking-wide">// Strategic timeline variables crafted to capture algorithmic speed.</p>
+              </ScrollReveal>
+            </div>
+
+            <div className="mt-14 grid auto-rows-[minmax(0,1fr)] grid-cols-1 gap-5 md:grid-cols-6">
+              
+              {/* Card 1: Pacing Animation (Word highlight loops) */}
+              <ScrollReveal className="md:col-span-4" delay={0}>
+                <div className="glass flex h-full flex-col gap-6 overflow-hidden rounded-3xl p-7 bento-card">
+                  <div>
+                    <h3 className="font-bebas text-2xl tracking-widest text-white uppercase">Retention pacing</h3>
+                    <p className="mt-2 text-xs sm:text-sm text-fg-dim font-mono uppercase">// Standard pacing loses 45% of viewers by sec 3. We edit to lock them in.</p>
+                  </div>
+                  
+                  <div className="mt-auto">
+                    {/* Waveform graphic */}
+                    <div className="flex items-end gap-1.5 h-16">
+                      {Array.from({ length: 28 }).map((_, idx) => {
+                        const h = 15 + Math.sin(idx * 0.4 + activeWordIdx) * 35;
+                        const active = idx < (activeWordIdx + 1) * 4;
+                        return (
+                          <div 
+                            key={idx} 
+                            className="flex-1 rounded-full transition-all duration-300"
+                            style={{
+                              height: `${h}px`,
+                              background: active ? 'var(--color-cyan)' : 'rgba(255, 255, 255, 0.12)',
+                              boxShadow: active ? '0 0 12px rgba(76, 219, 232, 0.45)' : 'none'
+                            }}
+                          ></div>
+                        );
+                      })}
+                    </div>
+                    {/* Word-by-word highlights */}
+                    <div className="mt-5 flex flex-wrap gap-2">
+                      {highlightWords.map((word, idx) => (
+                        <span 
+                          key={idx}
+                          className={`rounded-md px-2.5 py-1 text-[11px] font-mono font-semibold transition-all duration-300 uppercase ${
+                            idx === activeWordIdx 
+                              ? 'bg-[var(--color-accent)] text-black' 
+                              : 'bg-white/5 text-fg-dim'
+                          }`}
+                        >
+                          {word}
                         </span>
-                        <div className="wrapper-icon-accordion text-zinc-500 shrink-0">
-                          {isOpen ? (
-                            <Minus className="w-4 h-4 text-[#ff5722]" />
-                          ) : (
-                            <Plus className="w-4 h-4 group-hover:text-white transition-colors" />
-                          )}
-                        </div>
-                      </button>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+              </ScrollReveal>
 
-                      <div
-                        className="transition-all duration-300 ease-in-out overflow-hidden"
-                        style={{
-                          maxHeight: isOpen ? '160px' : '0px',
-                          opacity: isOpen ? 1 : 0
-                        }}
+              {/* Card 2: Depth effect masked behind SVG */}
+              <ScrollReveal className="md:col-span-2 md:row-span-2" delay={150}>
+                <div className="glass flex h-full flex-col gap-5 overflow-hidden rounded-3xl p-7 bento-card">
+                  <div>
+                    <h3 className="font-bebas text-2xl tracking-widest text-white uppercase">Visual Depth</h3>
+                    <p className="mt-2 text-xs text-fg-dim font-mono uppercase">// Text-behind-subject masks to pull characters into foreground depth.</p>
+                  </div>
+                  
+                  <div className="relative mt-auto flex-1 overflow-hidden rounded-2xl border border-white/5 bg-zinc-950/60 transition-transform duration-500 hover:scale-[1.02]" style={{ minHeight: '280px' }}>
+                    <svg viewBox="0 0 320 360" className="absolute inset-0 h-full w-full">
+                      <defs>
+                        <linearGradient id="dimFig" x1="0" y1="0" x2="1" y2="1">
+                          <stop offset="0%" stopColor="#5b9bff"></stop>
+                          <stop offset="55%" stopColor="#3a86ff"></stop>
+                          <stop offset="100%" stopColor="#14a394"></stop>
+                        </linearGradient>
+                        <linearGradient id="dimRim" x1="0" y1="0" x2="0" y2="1">
+                          <stop offset="0%" stopColor="rgba(255, 255, 255, 0.55)"></stop>
+                          <stop offset="35%" stopColor="rgba(255, 255, 255, 0)"></stop>
+                        </linearGradient>
+                        <filter id="dimSoft" x="-30%" y="-30%" width="160%" height="160%">
+                          <feGaussianBlur stdDeviation="7"></feGaussianBlur>
+                        </filter>
+                      </defs>
+                      <g>
+                        <text x="160" y="185" textAnchor="middle" className="font-bebas transition-all duration-300" style={{ fontSize: '96px', letterSpacing: '1px' }} fill="#ffffff" fillOpacity="0.9">PRIME</text>
+                      </g>
+                      <g>
+                        <ellipse cx="160" cy="352" rx="92" ry="20" fill="#04050a" opacity="0.6" filter="url(#dimSoft)"></ellipse>
+                        <path d="M150 246 C150 246 150 232 150 232 C118 226 96 196 96 156 C96 116 124 90 160 90 C196 90 224 116 224 156 C224 196 202 226 170 232 C170 232 170 246 170 246 C232 250 268 286 270 360 L50 360 C52 286 88 250 150 246 Z" fill="url(#dimFig)"></path>
+                        <path d="M96 156 C96 116 124 90 160 90 C196 90 224 116 224 156" fill="none" stroke="url(#dimRim)" strokeWidth="2.5" strokeLinecap="round"></path>
+                      </g>
+                    </svg>
+                    <div className="absolute bottom-3 right-3 flex items-center gap-1.5 rounded-full bg-black/50 px-2.5 py-1 text-[8px] font-mono text-[var(--color-cyan)] backdrop-blur">
+                      <span className="h-1 w-1 rounded-full bg-[var(--color-cyan)]"></span> tracking active
+                    </div>
+                  </div>
+                </div>
+              </ScrollReveal>
+
+              {/* Card 3: Edit Presets list */}
+              <ScrollReveal className="md:col-span-2" delay={100}>
+                <div className="glass flex h-full flex-col gap-6 overflow-hidden rounded-3xl p-7 bento-card">
+                  <div>
+                    <h3 className="font-bebas text-2xl tracking-widest text-white uppercase">Detail Precision</h3>
+                    <p className="mt-2 text-xs text-fg-dim font-mono uppercase">// Micro assets customized to match your branding elements.</p>
+                  </div>
+                  
+                  <div className="mt-auto flex flex-wrap gap-2.5">
+                    {["Zoom Cut", "Film Grade", "Sound FX", "Graphic Overlay", "Speed Ramp"].map((preset, idx) => (
+                      <span 
+                        key={idx}
+                        className="rounded-lg border border-white/10 bg-white/5 px-3 py-1.5 font-mono text-[10px] text-white uppercase transition-all duration-300 hover:scale-105 hover:bg-[var(--color-cyan)]/15 hover:border-[var(--color-cyan)] cursor-pointer"
                       >
-                        <p className="pb-6 text-xs md:text-sm text-gray-500 leading-relaxed font-mono uppercase select-text">
-                          {faq.a}
-                        </p>
+                        {preset}
+                      </span>
+                    ))}
+                  </div>
+                </div>
+              </ScrollReveal>
+
+              {/* Card 4: Progress loops */}
+              <ScrollReveal className="md:col-span-2" delay={200}>
+                <div className="glass flex h-full flex-col gap-6 overflow-hidden rounded-3xl p-7 bento-card">
+                  <div>
+                    <h3 className="font-bebas text-2xl tracking-widest text-white uppercase">Fluid Workflows</h3>
+                    <p className="mt-2 text-xs text-fg-dim font-mono uppercase">// Interactive review updates. Fast feedback turnarounds.</p>
+                  </div>
+                  
+                  <div className="mt-auto rounded-2xl border border-white/10 bg-black/35 p-4 transition-all duration-300 hover:shadow-[0_0_15px_rgba(58,134,255,0.15)]">
+                    <div className="flex items-center gap-3">
+                      <div className="grid h-8 w-8 place-items-center rounded-lg bg-[var(--color-accent)] text-black font-semibold text-[10px]">RAW</div>
+                      <div className="flex-1">
+                        <div className="flex justify-between text-[9px] font-mono"><span className="text-white uppercase">Rendering Edit…</span><span className="text-[var(--color-cyan)] font-bold">{exportProgress}%</span></div>
+                        <div className="mt-1.5 h-1.5 overflow-hidden rounded-full bg-white/10">
+                          <div className="h-full rounded-full bg-gradient-to-r from-[var(--color-accent)] to-[var(--color-cyan)] transition-all duration-150" style={{ width: `${exportProgress}%` }}></div>
+                        </div>
                       </div>
                     </div>
-                  );
-                })}
-              </div>
+                    <p className="mt-2 text-[8px] font-mono text-fg-faint uppercase">Active review draft · frame.io integration</p>
+                  </div>
+                </div>
+              </ScrollReveal>
 
             </div>
-          </div>
-        </section>
 
-        {/* 11. Contact Form Section */}
-        <section id="contact" className="section section-cta bg-black border-t border-[#1a1a24] py-24 md:py-36">
-          <div className="container mx-auto px-6 md:px-12 max-w-4xl">
-            <ContactForm />
-          </div>
-        </section>
+            {/* Bottom 3 cards row */}
+            <div className="mt-5 grid grid-cols-1 gap-5 sm:grid-cols-3">
+              <ScrollReveal delay={0}>
+                <div className="glass rounded-3xl p-6 bento-card">
+                  <h3 className="font-bebas text-xl tracking-widest text-white uppercase">Custom Overlays</h3>
+                  <p className="mt-2 text-xs text-fg-dim font-mono leading-relaxed uppercase">// Unique subtitle presets, illustrations, and motion banners.</p>
+                </div>
+              </ScrollReveal>
+              <ScrollReveal delay={100}>
+                <div className="glass rounded-3xl p-6 bento-card">
+                  <h3 className="font-bebas text-xl tracking-widest text-white uppercase">Fast turnarounds</h3>
+                  <p className="mt-2 text-xs text-fg-dim font-mono leading-relaxed uppercase">// Standard delivery within 48h. Keep your channels feed active.</p>
+                </div>
+              </ScrollReveal>
+              <ScrollReveal delay={200}>
+                <div className="glass rounded-3xl p-6 bento-card">
+                  <h3 className="font-bebas text-xl tracking-widest text-white uppercase">No registration</h3>
+                  <p className="mt-2 text-xs text-fg-dim font-mono leading-relaxed uppercase">// Submit project details and upload video links with no account barrier.</p>
+                </div>
+              </ScrollReveal>
+            </div>
+          </section>
 
-        {/* 12. Footer */}
-        <footer className="footer bg-black border-t border-[#1a1a24] py-12">
-          <div className="container mx-auto px-6 md:px-12 flex flex-col md:flex-row justify-between items-center gap-6">
+          {/* 8. Styles Section (Interactive previews on hover) */}
+          <section id="styles" className="relative py-24 sm:py-32">
+            <div className="mx-auto max-w-5xl px-6">
+              <div className="max-w-xl">
+                <ScrollReveal>
+                  <span className="kicker">Edit styles</span>
+                </ScrollReveal>
+                <ScrollReveal delay={100}>
+                  <h2 className="h-display mt-4 text-[clamp(2.2rem,5.5vw,4.5rem)] text-gradient uppercase">Seven looks. <span className="text-accent-gradient">One goal.</span></h2>
+                </ScrollReveal>
+                <ScrollReveal delay={200}>
+                  <p className="mt-4 text-fg-dim text-sm sm:text-base font-mono uppercase tracking-wide">// Diverse edit strategies designed for specific channels and niches. Hover a style to feel it move.</p>
+                </ScrollReveal>
+              </div>
+            </div>
 
+            {/* Styles Cards Grid */}
+            <div className="mx-auto mt-14 grid max-w-5xl grid-cols-1 gap-5 px-6 sm:grid-cols-2 lg:grid-cols-3">
+              
+              {/* Style Card 1: Editorial */}
+              <ScrollReveal delay={0}>
+                <div 
+                  className="glass group relative flex flex-col justify-between overflow-hidden rounded-3xl min-h-[250px] transition-all duration-300 cursor-pointer"
+                >
+                  <div className="pointer-events-none absolute inset-0 opacity-0 transition-opacity duration-500 group-hover:opacity-100" style={{ background: 'radial-gradient(60% 50% at 50% 30%, rgba(58,134,255,0.08), transparent 70%)' }}></div>
+                  <div className="flex-1 flex items-center justify-center bg-black/35 p-6">
+                    <div className="text-center font-bebas text-4xl uppercase tracking-wider leading-none transition-transform duration-500 group-hover:scale-105">
+                      RETENTION IS <span className="text-[var(--color-cyan)] editorial-word">KING</span>
+                    </div>
+                  </div>
+                  <div className="border-t border-white/5 p-5">
+                    <div className="flex items-center justify-between">
+                      <h3 className="font-bebas text-xl tracking-wider text-white uppercase">Editorial Hook</h3>
+                      <span className="h-1.5 w-1.5 rounded-full bg-[var(--color-cyan)] opacity-60 group-hover:opacity-100"></span>
+                    </div>
+                    <p className="mt-1 text-[11px] font-mono text-fg-dim uppercase">Bold headers, magazine grids, styled overlays.</p>
+                  </div>
+                </div>
+              </ScrollReveal>
+
+              {/* Style Card 2: Pop Up */}
+              <ScrollReveal delay={100}>
+                <div 
+                  className="glass group relative flex flex-col justify-between overflow-hidden rounded-3xl min-h-[250px] transition-all duration-300 cursor-pointer"
+                >
+                  <div className="pointer-events-none absolute inset-0 opacity-0 transition-opacity duration-500 group-hover:opacity-100" style={{ background: 'radial-gradient(60% 50% at 50% 30%, rgba(58,134,255,0.08), transparent 70%)' }}></div>
+                  <div className="flex-1 flex items-center justify-center bg-black/35 p-6">
+                    <div className="flex gap-2">
+                      <span className="font-mono text-lg font-bold text-white uppercase popup-word">captions</span>
+                      <span className="font-mono text-lg font-bold text-white uppercase popup-word">that</span>
+                      <span className="font-mono text-lg font-bold text-white uppercase popup-word text-[var(--color-cyan)]">pop</span>
+                    </div>
+                  </div>
+                  <div className="border-t border-white/5 p-5">
+                    <div className="flex items-center justify-between">
+                      <h3 className="font-bebas text-xl tracking-wider text-white uppercase">Pop Up</h3>
+                      <span className="h-1.5 w-1.5 rounded-full bg-[var(--color-cyan)] opacity-60 group-hover:opacity-100"></span>
+                    </div>
+                    <p className="mt-1 text-[11px] font-mono text-fg-dim uppercase">Rapid word-level captions popping on the audio beats.</p>
+                  </div>
+                </div>
+              </ScrollReveal>
+
+              {/* Style Card 3: Minimal */}
+              <ScrollReveal delay={200}>
+                <div 
+                  className="glass group relative flex flex-col justify-between overflow-hidden rounded-3xl min-h-[250px] transition-all duration-300 cursor-pointer"
+                >
+                  <div className="pointer-events-none absolute inset-0 opacity-0 transition-opacity duration-500 group-hover:opacity-100" style={{ background: 'radial-gradient(60% 50% at 50% 30%, rgba(58,134,255,0.08), transparent 70%)' }}></div>
+                  <div className="flex-1 flex items-center justify-center bg-black/35 p-6">
+                    <div className="font-mono text-sm tracking-widest lowercase minimal-text">
+                      clean cuts only
+                    </div>
+                  </div>
+                  <div className="border-t border-white/5 p-5">
+                    <div className="flex items-center justify-between">
+                      <h3 className="font-bebas text-xl tracking-wider text-white uppercase">Minimalist</h3>
+                      <span className="h-1.5 w-1.5 rounded-full bg-[var(--color-cyan)] opacity-60 group-hover:opacity-100"></span>
+                    </div>
+                    <p className="mt-1 text-[11px] font-mono text-fg-dim uppercase">Quiet lowercase labels, out of the way of the speaker frame.</p>
+                  </div>
+                </div>
+              </ScrollReveal>
+
+              {/* Style Card 4: Veena / Tall */}
+              <ScrollReveal delay={0}>
+                <div 
+                  className="glass group relative flex flex-col justify-between overflow-hidden rounded-3xl min-h-[250px] transition-all duration-300 cursor-pointer"
+                >
+                  <div className="pointer-events-none absolute inset-0 opacity-0 transition-opacity duration-500 group-hover:opacity-100" style={{ background: 'radial-gradient(60% 50% at 50% 30%, rgba(58,134,255,0.08), transparent 70%)' }}></div>
+                  <div className="flex-1 flex items-center justify-center bg-black/35 p-6">
+                    <div className="flex flex-col items-center leading-none text-center">
+                      <span className="font-bebas text-3xl text-white uppercase tracking-wider">CINEMATIC</span>
+                      <span className="font-bebas text-3xl text-[var(--color-cyan)] uppercase tracking-wider veena-text-1">PACING</span>
+                    </div>
+                  </div>
+                  <div className="border-t border-white/5 p-5">
+                    <div className="flex items-center justify-between">
+                      <h3 className="font-bebas text-xl tracking-wider text-white uppercase">Cinematic Pacing</h3>
+                      <span className="h-1.5 w-1.5 rounded-full bg-[var(--color-cyan)] opacity-60 group-hover:opacity-100"></span>
+                    </div>
+                    <p className="mt-1 text-[11px] font-mono text-fg-dim uppercase">Condensed high impact typography, stacked for drama.</p>
+                  </div>
+                </div>
+              </ScrollReveal>
+
+              {/* Style Card 5: Aesthetics / Serif */}
+              <ScrollReveal delay={100}>
+                <div 
+                  className="glass group relative flex flex-col justify-between overflow-hidden rounded-3xl min-h-[250px] transition-all duration-300 cursor-pointer"
+                >
+                  <div className="pointer-events-none absolute inset-0 opacity-0 transition-opacity duration-500 group-hover:opacity-100" style={{ background: 'radial-gradient(60% 50% at 50% 30%, rgba(58,134,255,0.08), transparent 70%)' }}></div>
+                  <div className="flex-1 flex items-center justify-center bg-black/35 p-6">
+                    <div className="font-serif-d text-2xl italic text-fg font-light tracking-wide aesthetics-text">
+                      a softer kind of grade
+                    </div>
+                  </div>
+                  <div className="border-t border-white/5 p-5">
+                    <div className="flex items-center justify-between">
+                      <h3 className="font-bebas text-xl tracking-wider text-white uppercase">Aesthetics</h3>
+                      <span className="h-1.5 w-1.5 rounded-full bg-[var(--color-cyan)] opacity-60 group-hover:opacity-100"></span>
+                    </div>
+                    <p className="mt-1 text-[11px] font-mono text-fg-dim uppercase">Elegant serif configurations. Soft cinematic grades.</p>
+                  </div>
+                </div>
+              </ScrollReveal>
+
+              {/* Style Card 6: 8-bit Monospace */}
+              <ScrollReveal delay={200}>
+                <div 
+                  className="glass group relative flex flex-col justify-between overflow-hidden rounded-3xl min-h-[250px] transition-all duration-300 cursor-pointer"
+                >
+                  <div className="pointer-events-none absolute inset-0 opacity-0 transition-opacity duration-500 group-hover:opacity-100" style={{ background: 'radial-gradient(60% 50% at 50% 30%, rgba(58,134,255,0.08), transparent 70%)' }}></div>
+                  <div className="flex-1 flex items-center justify-center bg-black/35 p-6">
+                    <div className="font-pixel text-[10px] uppercase tracking-widest pixel-text">
+                      PIXEL PERFECT ▶
+                    </div>
+                  </div>
+                  <div className="border-t border-white/5 p-5">
+                    <div className="flex items-center justify-between">
+                      <h3 className="font-bebas text-xl tracking-wider text-white uppercase">8-Bit Retro</h3>
+                      <span className="h-1.5 w-1.5 rounded-full bg-[var(--color-cyan)] opacity-60 group-hover:opacity-100"></span>
+                    </div>
+                    <p className="mt-1 text-[11px] font-mono text-fg-dim uppercase">Arcade font layouts, glitch effects, neon palettes.</p>
+                  </div>
+                </div>
+              </ScrollReveal>
+
+              {/* CTA Card: Try them all */}
+              <ScrollReveal delay={100}>
+                <div className="glass-strong flex flex-col justify-between rounded-3xl p-7 min-h-[250px] transition-transform duration-300 hover:scale-[1.02]">
+                  <span className="kicker">+ more styles</span>
+                  <div>
+                    <h3 className="font-bebas text-2xl tracking-widest text-white uppercase">Your brand signature</h3>
+                    <p className="mt-2 text-xs sm:text-sm text-fg-dim font-mono leading-relaxed uppercase">// We calibrate custom overlays, grading templates, and timings specifically for your identity.</p>
+                  </div>
+                  <a href="#contact" className="btn btn-primary h-10 px-5 text-xs font-semibold uppercase tracking-wider self-start cursor-pointer">
+                    Brief our team
+                  </a>
+                </div>
+              </ScrollReveal>
+
+            </div>
+          </section>
+
+          {/* 9. Algorithm Marquee (Platforms list) */}
+          <section id="channels" className="relative overflow-hidden py-24 sm:py-32">
+            {/* Soft cyan background radial spot */}
+            <div className="pointer-events-none absolute left-1/2 top-1/3 -z-10 h-[380px] w-[380px] -translate-x-1/2 rounded-full opacity-20 blur-[100px]" style={{ background: 'radial-gradient(circle, var(--color-cyan), transparent 70%)' }}></div>
+            
+            <div className="mx-auto max-w-5xl px-6">
+              <div className="grid gap-12 lg:grid-cols-2 lg:items-center">
+                <div>
+                  <ScrollReveal>
+                    <span className="kicker">Channels</span>
+                  </ScrollReveal>
+                  <ScrollReveal delay={100}>
+                    <h2 className="h-display mt-4 text-[clamp(2.2rem,5.5vw,4.5rem)] text-gradient uppercase">Optimized for <span className="text-accent-gradient">every</span> app</h2>
+                  </ScrollReveal>
+                  <ScrollReveal delay={200}>
+                    <p className="mt-4 text-fg-dim text-sm sm:text-base font-mono leading-relaxed uppercase">
+                      // Different platforms require different templates. We adjust framing crops, resolution encodes, and graphic assets for YouTube, Shorts, TikTok, and Meta Ads to secure organic retention.
+                    </p>
+                  </ScrollReveal>
+                  
+                  {/* Platforms tags */}
+                  <ScrollReveal delay={300}>
+                    <div className="mt-8 flex flex-wrap gap-2">
+                      {["YouTube", "Instagram Reels", "TikTok Shorts", "LinkedIn Video", "Twitter Video", "Meta Ads", "Pinterest Promos"].map((chan, idx) => (
+                        <span 
+                          key={idx} 
+                          className="rounded-full border border-white/10 bg-white/5 px-3.5 py-1.5 text-xs font-mono text-fg-dim uppercase transition-all duration-300 hover:scale-105 hover:bg-white/10 hover:border-white/20 cursor-pointer"
+                        >
+                          {chan}
+                        </span>
+                      ))}
+                    </div>
+                  </ScrollReveal>
+                </div>
+
+                {/* Big Metric Display glass panel */}
+                <div>
+                  <ScrollReveal delay={200}>
+                    <div className="glass-strong relative min-h-[220px] rounded-3xl p-8 flex flex-col justify-between bento-card">
+                      <div className="flex items-center justify-between">
+                        <span className="kicker">Performance metrics</span>
+                        <span className="rounded-full bg-[var(--color-cyan)]/10 border border-[var(--color-cyan)]/20 px-3 py-1 font-mono text-[9px] text-[var(--color-cyan)] uppercase">typical results</span>
+                      </div>
+                      
+                      <div className="my-6 text-center">
+                        <span className="font-bebas text-7xl sm:text-8xl leading-none text-accent-gradient tracking-wide block">58%</span>
+                        <span className="text-[10px] font-mono text-fg-dim uppercase tracking-wider mt-1 block">average client view retention</span>
+                      </div>
+
+                      <div className="border-t border-white/5 pt-4 flex justify-between items-center text-[9px] font-mono text-fg-faint uppercase">
+                        <span>vs 32% industry benchmark</span>
+                        <span>audited views data</span>
+                      </div>
+                    </div>
+                  </ScrollReveal>
+                </div>
+              </div>
+            </div>
+
+            {/* Horizontal Continuous Marquee */}
+            <ScrollReveal delay={300}>
+              <div className="relative mt-20 [mask-image:linear-gradient(90deg,transparent,#000_12%,#000_88%,transparent)] select-none">
+                <div className="marquee-track font-bebas text-4xl sm:text-5xl uppercase tracking-widest text-white/15 cursor-pointer">
+                  {Array.from({ length: 2 }).map((_, loopIdx) => (
+                    <React.Fragment key={loopIdx}>
+                      <span className="mx-7">YouTube</span>
+                      <span className="mx-7 text-[var(--color-cyan)]">Reels</span>
+                      <span className="mx-7">TikTok</span>
+                      <span className="mx-7">LinkedIn Video</span>
+                      <span className="mx-7 text-[var(--color-accent)]">Meta Ads</span>
+                      <span className="mx-7">Vimeo</span>
+                      <span className="mx-7">X Shorts</span>
+                      <span className="mx-7 text-[var(--color-cyan)]">Short-form</span>
+                      <span className="mx-7">Organic growth</span>
+                    </React.Fragment>
+                  ))}
+                </div>
+              </div>
+            </ScrollReveal>
+          </section>
+
+          {/* 10. CTA Form Section (Brief Submission form wrapped) */}
+          <section id="contact" className="relative bg-zinc-950/40 border-t border-white/5 py-24 sm:py-32">
+            <div className="mx-auto max-w-3xl px-6">
+              <ScrollReveal>
+                <ContactForm />
+              </ScrollReveal>
+            </div>
+          </section>
+        </main>
+
+        {/* 11. Footer with Mumbai time clock */}
+        <footer className="footer bg-[#04050a] border-t border-white/5 py-12">
+          <div className="container mx-auto px-6 md:px-12 flex flex-col md:flex-row justify-between items-center gap-6 max-w-5xl">
             <div className="flex flex-col items-center md:items-start gap-3">
-              <div className="flex items-center gap-2.5">
-                <img src="/logo.svg" alt="Prime Edits Logo" className="h-6 w-auto" />
-                <span className="font-sans font-black tracking-widest text-sm text-white uppercase">
-                  PRIME EDITS
+              <div className="flex items-center gap-2">
+                <span className="font-bebas font-black tracking-widest text-lg text-white uppercase">
+                  PRIME EDITS<span className="text-[var(--color-cyan)]">.</span>
                 </span>
               </div>
-              <p className="text-[10px] font-mono text-zinc-600 uppercase">
+              <p className="text-[8px] font-mono text-fg-faint uppercase">
                 &copy; {new Date().getFullYear()} PRIME EDITS. ALL RIGHTS RESERVED.
               </p>
             </div>
 
             {/* Time Clock & Links */}
             <div className="flex flex-col items-center md:items-end gap-2">
-              <div className="flex items-center gap-2 font-mono text-[10px] text-zinc-500 uppercase">
-                <Clock className="w-3.5 h-3.5 text-[#ff5722]" />
-                <span>MUMBAI TIME:</span>
+              <div className="flex items-center gap-2 font-mono text-[9px] text-fg-dim uppercase">
+                <Clock className="w-3.5 h-3.5 text-[var(--color-cyan)] animate-pulse" />
+                <span>mumbai time:</span>
                 <span className="text-white font-bold">{timeString}</span>
               </div>
-              <div className="flex gap-4 text-xs font-mono text-zinc-500 uppercase tracking-widest mt-1">
-                <a href="#hero" className="hover:text-white">TOP</a>
+              <div className="flex gap-4 text-[9px] font-mono text-fg-faint uppercase tracking-widest mt-1">
+                <a href="#top" className="hover:text-white flex items-center gap-1 transition-transform hover:-translate-y-0.5">
+                  Top <ArrowUp className="w-3 h-3" />
+                </a>
                 <span>/</span>
-                <a href="#contact" className="hover:text-white">BRIEF FORM</a>
+                <a href="#contact" className="hover:text-white transition-transform hover:-translate-y-0.5">Brief Form</a>
               </div>
             </div>
-
           </div>
         </footer>
 
