@@ -3,7 +3,7 @@ import {
   Film, Video, Play, Sparkles, Wand2, ShieldCheck, Zap,
   Layers, Palette, Scissors, ArrowUpRight, ArrowLeft, ArrowRight,
   Phone, Mail, MapPin, Check, Plus, Minus, ChevronDown, Award, Globe,
-  Clock, HeartHandshake, Instagram, X, ArrowUp
+  Clock, HeartHandshake, Instagram, X, ArrowUp, Link
 } from 'lucide-react';
 import Lenis from 'lenis';
 import gsap from 'gsap';
@@ -18,6 +18,15 @@ import ContactForm from './components/ContactForm';
 // Register GSAP plugins
 gsap.registerPlugin(ScrollTrigger);
 
+// Hero Background Configuration
+const USE_VIDEO_BACKGROUND = true; // Set to false to use the WebGL interactive fluid shader instead
+const HERO_VIDEO_URL = "/hero_bg.mp4";
+// Alternatives:
+// - Technology Loop: "https://assets.mixkit.co/videos/preview/mixkit-abstract-technology-screen-background-34289-large.mp4"
+// - Neon Light Tunnel: "https://assets.mixkit.co/videos/preview/mixkit-tunnel-of-neon-blue-lights-41712-large.mp4"
+// - Cinematic Light Leaks: "https://assets.mixkit.co/videos/preview/mixkit-lens-flare-and-light-leaks-41753-large.mp4"
+// - Local File: "/hero-bg.mp4" (place your hero-bg.mp4 in the public/ folder)
+
 export default function App() {
   const [preloaderDone, setPreloaderDone] = useState(false);
   const [scrolled, setScrolled] = useState(false);
@@ -26,6 +35,7 @@ export default function App() {
   const [activeWordIdx, setActiveWordIdx] = useState(0);
   const [exportProgress, setExportProgress] = useState(0);
   const [menuOpen, setMenuOpen] = useState(false);
+  const [copiedLink, setCopiedLink] = useState(false);
 
   // Refs for scroll elements and carousel
   const headerRef = useRef(null);
@@ -193,6 +203,13 @@ export default function App() {
     }
   };
 
+  const handleCopyLink = (e) => {
+    e.preventDefault();
+    navigator.clipboard.writeText(window.location.origin);
+    setCopiedLink(true);
+    setTimeout(() => setCopiedLink(false), 2000);
+  };
+
   // Carousel click scroll handler
   const handleCarouselScroll = (direction) => {
     if (carouselRef.current) {
@@ -348,10 +365,28 @@ export default function App() {
         </header>
 
         <main id="top">
-          {/* 4. Hero Section with shader background */}
+          {/* 4. Hero Section with shader/video background */}
           <section className="relative isolate min-h-[100svh] overflow-hidden pt-28 flex items-center">
-            {/* Background Shader & Repeating Grids */}
-            <WebGLBackground className="absolute inset-0 -z-10" />
+            {/* Background Video / Shader & Repeating Grids */}
+            {USE_VIDEO_BACKGROUND ? (
+              <div className="absolute inset-0 -z-10 overflow-hidden">
+                {/* Overlay masks for high legibility */}
+                <div className="absolute inset-0 bg-[#04050a]/25 z-10 mix-blend-multiply"></div>
+                <div className="absolute inset-0 bg-gradient-to-b from-[#04050a]/0 via-[#04050a]/30 to-[#04050a] z-10"></div>
+                <video
+                  autoPlay
+                  loop
+                  muted
+                  playsInline
+                  className="w-full h-full object-cover opacity-80"
+                  poster="/hero-bg.png"
+                >
+                  <source src={HERO_VIDEO_URL} type="video/mp4" />
+                </video>
+              </div>
+            ) : (
+              <WebGLBackground className="absolute inset-0 -z-10" />
+            )}
             <div className="bg-grid pointer-events-none absolute inset-0 -z-[5]"></div>
 
 
@@ -1037,7 +1072,7 @@ export default function App() {
 
         {/* 11. Footer with Mumbai time clock */}
         <footer className="footer bg-[#04050a] border-t border-white/5 py-12">
-          <div className="container mx-auto px-6 md:px-12 flex flex-col md:flex-row justify-between items-center gap-6 max-w-5xl">
+          <div className="container mx-auto px-6 md:px-12 flex flex-col md:flex-row justify-between items-center gap-8 max-w-5xl">
             <div className="flex flex-col items-center md:items-start gap-3">
               <div className="flex items-center gap-2">
                 <span className="font-bebas font-black tracking-widest text-lg text-white uppercase">
@@ -1047,6 +1082,65 @@ export default function App() {
               <p className="text-[8px] font-mono text-fg-faint uppercase">
                 &copy; {new Date().getFullYear()} PRIME EDITS. ALL RIGHTS RESERVED.
               </p>
+            </div>
+
+            {/* Social Nav Links */}
+            <div className="flex flex-wrap justify-center items-center gap-x-6 gap-y-3 text-fg-dim">
+              {/* WhatsApp */}
+              <a 
+                href="https://wa.me/918530601724/?text=Hello!%20am%20interested%20in%20your%20services.%20" 
+                target="_blank" 
+                rel="noopener noreferrer" 
+                className="hover:text-[var(--color-cyan)] transition-all duration-300 flex items-center gap-1.5 text-[10px] font-mono uppercase tracking-wider group cursor-pointer"
+                title="WhatsApp"
+              >
+                <svg className="w-3.5 h-3.5 fill-current" viewBox="0 0 24 24">
+                  <path d="M.057 24l1.687-6.163c-1.041-1.804-1.588-3.849-1.587-5.946C.06 5.348 5.397.01 12.008.01c3.202.001 6.212 1.246 8.477 3.513 2.262 2.268 3.507 5.28 3.505 8.484-.004 6.657-5.34 11.997-11.953 11.997-2.005-.001-3.973-.502-5.724-1.457L0 24zm6.59-4.846c1.6.95 3.188 1.449 4.825 1.451 5.436 0 9.86-4.37 9.864-9.799.002-2.63-1.023-5.101-2.885-6.97-1.861-1.868-4.339-2.897-6.97-2.899-5.437 0-9.862 4.37-9.866 9.801-.001 1.947.51 3.841 1.48 5.53l-.973 3.555 3.642-.958zm12.355-6.52c-.272-.136-1.61-.794-1.859-.884-.25-.09-.432-.136-.613.136-.182.273-.704.884-.863 1.066-.159.182-.318.204-.59.068-.272-.136-1.15-.424-2.19-1.354-.809-.722-1.355-1.614-1.513-1.886-.159-.273-.017-.42.119-.556.122-.122.272-.318.408-.477.136-.159.182-.272.272-.454.09-.181.045-.341-.022-.477-.068-.136-.613-1.477-.84-2.023-.222-.534-.486-.46-.667-.47l-.571-.01c-.197 0-.518.074-.789.37-.272.296-1.04 1.016-1.04 2.479 0 1.462 1.067 2.875 1.215 3.07.149.197 2.095 3.2 5.08 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.61-.658 1.838-1.263.228-.605.228-1.123.159-1.233-.068-.11-.25-.204-.522-.34z"/>
+                </svg>
+                <span className="hidden lg:inline group-hover:underline">WhatsApp</span>
+              </a>
+
+              {/* Email */}
+              <a 
+                href="mailto:primeditspe@gmail.com" 
+                className="hover:text-[var(--color-cyan)] transition-all duration-300 flex items-center gap-1.5 text-[10px] font-mono uppercase tracking-wider group cursor-pointer"
+                title="Email"
+              >
+                <Mail className="w-3.5 h-3.5" />
+                <span className="hidden lg:inline group-hover:underline">Email</span>
+              </a>
+
+              {/* Phone */}
+              <a 
+                href="tel:+918530601724" 
+                className="hover:text-[var(--color-cyan)] transition-all duration-300 flex items-center gap-1.5 text-[10px] font-mono uppercase tracking-wider group cursor-pointer"
+                title="Phone"
+              >
+                <Phone className="w-3.5 h-3.5" />
+                <span className="hidden lg:inline group-hover:underline">Call</span>
+              </a>
+
+              {/* Instagram */}
+              <a 
+                href="https://instagram.com/primeedits" 
+                target="_blank" 
+                rel="noopener noreferrer" 
+                className="hover:text-[var(--color-cyan)] transition-all duration-300 flex items-center gap-1.5 text-[10px] font-mono uppercase tracking-wider group cursor-pointer"
+                title="Instagram"
+              >
+                <Instagram className="w-3.5 h-3.5" />
+                <span className="hidden lg:inline group-hover:underline">Insta</span>
+              </a>
+
+              {/* Copy Link */}
+              {/* <button 
+                onClick={handleCopyLink} 
+                className="hover:text-[var(--color-cyan)] transition-all duration-300 flex items-center gap-1.5 text-[10px] font-mono uppercase tracking-wider group cursor-pointer"
+                title="Copy Website Link"
+              >
+                <Link className="w-3.5 h-3.5" />
+                <span className="group-hover:underline">{copiedLink ? 'Copied!' : 'Copy Link'}</span>
+              </button> */}
             </div>
 
             {/* Time Clock & Links */}

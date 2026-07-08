@@ -57,8 +57,6 @@ body {
   margin: 0;
   overflow-x: hidden;
   background-color: #04050a;
-  perspective: 1200px;
-  transform-style: preserve-3d;
 }
 
 /* Scrollbar Customization */
@@ -404,7 +402,7 @@ html.lenis {
 .reveal-item {
   opacity: 0;
   filter: blur(8px);
-  transform: translateY(45px) scale(0.94) rotateX(7deg);
+  transform: perspective(1200px) translateY(45px) scale(0.94) rotateX(7deg);
   transform-origin: top center;
   transition: opacity 1.1s cubic-bezier(0.16, 1, 0.3, 1),
               filter 1.2s cubic-bezier(0.16, 1, 0.3, 1),
@@ -415,7 +413,7 @@ html.lenis {
 .reveal-item.is-visible {
   opacity: 1;
   filter: blur(0px);
-  transform: translateY(0) scale(1) rotateX(0deg);
+  transform: perspective(1200px) translateY(0) scale(1) rotateX(0deg);
 }
 
 /* Component Micro-Animations and Hover states */

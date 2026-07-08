@@ -31,3 +31,6 @@ lerna-debug.log*
 *.njsproj
 *.sln
 *.sw?
+
+# Vite temporary timestamp files
+vite.config.js.timestamp-*

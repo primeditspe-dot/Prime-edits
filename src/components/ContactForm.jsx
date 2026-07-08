@@ -221,7 +221,7 @@ export default function ContactForm() {
               onChange={handleInputChange} 
               required
               className="w-full bg-transparent px-5 py-2 text-[0.95rem] text-white placeholder:text-fg-faint focus:outline-none font-mono"
-              placeholder="Karan Verma"
+              placeholder="Prem Sawairam"
             />
           </div>
         </div>
@@ -238,7 +238,7 @@ export default function ContactForm() {
               onChange={handleInputChange} 
               required
               className="w-full bg-transparent px-5 py-2 text-[0.95rem] text-white placeholder:text-fg-faint focus:outline-none font-mono"
-              placeholder="karan@channel.com"
+              placeholder="abc@gmail.com"
             />
           </div>
         </div>
