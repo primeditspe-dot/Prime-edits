@@ -32,5 +32,8 @@ lerna-debug.log*
 *.sln
 *.sw?
 
-# Vite temporary timestamp files
-vite.config.js.timestamp-*
+# Firebase Keys & Credentials
+*key.json
+*credentials.json
+*service-account.json
+firebase-*.json

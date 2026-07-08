@@ -20,7 +20,7 @@ gsap.registerPlugin(ScrollTrigger);
 
 // Hero Background Configuration
 const USE_VIDEO_BACKGROUND = true; // Set to false to use the WebGL interactive fluid shader instead
-const HERO_VIDEO_URL = "/hero_bg.mp4";
+const HERO_VIDEO_URL = "https://res.cloudinary.com/cugrsgyr/video/upload/v1783530049/hero_bg_oeas78.mp4";
 // Alternatives:
 // - Technology Loop: "https://assets.mixkit.co/videos/preview/mixkit-abstract-technology-screen-background-34289-large.mp4"
 // - Neon Light Tunnel: "https://assets.mixkit.co/videos/preview/mixkit-tunnel-of-neon-blue-lights-41712-large.mp4"
