@@ -241,6 +241,10 @@ if (process.env.NODE_ENV === 'production' || process.env.SERVE_STATIC === 'true'
 }
 
 // Start Server
-app.listen(PORT, () => {
-  console.log(`🚀 Prime Edits Backend server running on port ${PORT}`);
-});
+if (process.env.NODE_ENV !== 'production' || process.env.SERVE_STATIC === 'true') {
+  app.listen(PORT, () => {
+    console.log(`🚀 Prime Edits Backend server running on port ${PORT}`);
+  });
+}
+
+export default app;
