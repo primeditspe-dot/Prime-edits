@@ -37,3 +37,4 @@ lerna-debug.log*
 *credentials.json
 *service-account.json
 firebase-*.json
+firebase-key.json

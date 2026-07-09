@@ -5,10 +5,10 @@
   "description": "Unified platform for Prime Edits, incorporating React client and Express backend.",
   "scripts": {
     "dev:client": "vite",
-    "dev:server": "nodemon server.js",
+    "dev:server": "nodemon api/index.js",
     "dev": "concurrently \"npm run dev:server\" \"npm run dev:client\"",
     "build": "vite build",
-    "start": "node server.js",
+    "start": "node api/index.js",
     "preview": "vite preview"
   },
   "dependencies": {
