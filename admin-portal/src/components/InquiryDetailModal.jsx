@@ -161,13 +161,12 @@ function InquiryDetailModal({ contact, token, onClose, onUpdate }) {
       />
 
       {/* Detail Slide Panel */}
-      <div className="glass-panel animate-slide-left" style={{
+      <div className="glass-panel animate-slide-left detail-panel" style={{
         position: 'fixed',
         top: 0,
         right: 0,
         bottom: 0,
         width: '100%',
-        maxWidth: '520px',
         zIndex: 21,
         boxShadow: '-10px 0 30px rgba(0, 0, 0, 0.5)',
         display: 'flex',

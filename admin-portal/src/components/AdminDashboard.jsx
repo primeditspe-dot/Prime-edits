@@ -160,7 +160,7 @@ function AdminDashboard({ token, handleLogout }) {
             }}>
               PRIME EDITS
             </h1>
-            <span style={{ fontSize: '0.7rem', color: 'var(--color-cyan)', fontFamily: 'var(--font-mono)', fontWeight: 600 }}>
+            <span className="hide-on-mobile" style={{ fontSize: '0.7rem', color: 'var(--color-cyan)', fontFamily: 'var(--font-mono)', fontWeight: 600 }}>
               ADMIN OPERATIONS PORTAL
             </span>
           </div>
@@ -179,7 +179,7 @@ function AdminDashboard({ token, handleLogout }) {
               display: 'inline-block',
               animation: 'pulseGlow 2s infinite'
             }} />
-            <span style={{ fontFamily: 'var(--font-mono)', color: '#aab1c5' }}>{connectionStatus}</span>
+            <span className="hide-on-mobile" style={{ fontFamily: 'var(--font-mono)', color: '#aab1c5' }}>{connectionStatus}</span>
           </div>
 
           {/* Refresh Button */}
@@ -217,7 +217,7 @@ function AdminDashboard({ token, handleLogout }) {
             }}
           >
             <LogOut size={16} />
-            <span>Logout</span>
+            <span className="hide-on-mobile">Logout</span>
           </button>
         </div>
       </header>
@@ -282,7 +282,7 @@ function AdminDashboard({ token, handleLogout }) {
         </section>
 
         {/* 2. Visual Analytics Section (SVG charts) */}
-        <section style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(450px, 1fr))', gap: '1.5rem', marginBottom: '2.5rem' }}>
+        <section style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '1.5rem', marginBottom: '2.5rem' }}>
           {/* Services Distribution Chart */}
           <div className="glass-panel" style={{ padding: '1.5rem', borderRadius: '16px' }}>
             <h4 style={{ fontSize: '0.95rem', fontWeight: 700, marginBottom: '1.25rem', color: 'var(--color-fg-dim)' }}>
@@ -366,7 +366,7 @@ function AdminDashboard({ token, handleLogout }) {
           }}>
             <h3 style={{ fontSize: '1.15rem', fontWeight: 800 }}>Inquiry Entries</h3>
 
-            <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', flexWrap: 'wrap' }}>
+            <div className="filters-wrapper" style={{ display: 'flex', alignItems: 'center', gap: '1rem', flexWrap: 'wrap' }}>
               {/* Search Bar */}
               <div style={{ position: 'relative' }}>
                 <Search size={16} style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)', color: '#707892' }} />
@@ -430,70 +430,118 @@ function AdminDashboard({ token, handleLogout }) {
               <p style={{ fontSize: '0.95rem' }}>No inquiries matching your criteria were found.</p>
             </div>
           ) : (
-            <div className="table-container">
-              <table className="admin-table">
-                <thead>
-                  <tr>
-                    <th>Client / Contact</th>
-                    <th>Requested Service</th>
-                    <th>Estimated Budget</th>
-                    <th>Date Received</th>
-                    <th>Status</th>
-                    <th style={{ textAlign: 'right' }}>Action</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {filteredContacts.map((contact) => (
-                    <tr key={contact.id}>
-                      <td>
-                        <div style={{ fontWeight: 700 }}>{contact.name}</div>
-                        <div style={{ fontSize: '0.75rem', color: '#aab1c5', display: 'flex', flexDirection: 'column', marginTop: '0.15rem' }}>
-                          <span style={{ display: 'inline-flex', alignItems: 'center', gap: '0.25rem' }}>
-                            <Mail size={10} /> {contact.email}
-                          </span>
-                          {contact.phone && (
-                            <span style={{ display: 'inline-flex', alignItems: 'center', gap: '0.25rem', marginTop: '0.1rem' }}>
-                              <Phone size={10} /> {contact.phone}
-                            </span>
-                          )}
-                        </div>
-                      </td>
-                      <td>
-                        <div style={{ fontWeight: 500 }}>{contact.service}</div>
-                      </td>
-                      <td>
-                        <div style={{ fontFamily: 'var(--font-mono)', fontSize: '0.85rem' }}>{contact.budget}</div>
-                      </td>
-                      <td>
-                        <div style={{ display: 'inline-flex', alignItems: 'center', gap: '0.35rem', fontSize: '0.8rem', color: '#aab1c5' }}>
-                          <Calendar size={12} />
-                          {formatDate(contact.createdAt)}
-                        </div>
-                      </td>
-                      <td>
-                        {renderBadge(contact.status)}
-                      </td>
-                      <td style={{ textAlign: 'right' }}>
-                        <button 
-                          onClick={() => setSelectedContact(contact)}
-                          className="admin-btn"
-                          style={{
-                            padding: '0.35rem 0.75rem',
-                            fontSize: '0.8rem',
-                            background: 'rgba(255,255,255,0.04)',
-                            border: '1px solid var(--color-line)',
-                            borderRadius: '8px'
-                          }}
-                        >
-                          <span>Review</span>
-                          <ChevronRight size={14} />
-                        </button>
-                      </td>
+            <>
+              {/* Desktop Table View */}
+              <div className="table-container">
+                <table className="admin-table">
+                  <thead>
+                    <tr>
+                      <th>Client / Contact</th>
+                      <th>Requested Service</th>
+                      <th>Estimated Budget</th>
+                      <th>Date Received</th>
+                      <th>Status</th>
+                      <th style={{ textAlign: 'right' }}>Action</th>
                     </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
+                  </thead>
+                  <tbody>
+                    {filteredContacts.map((contact) => (
+                      <tr key={contact.id}>
+                        <td>
+                          <div style={{ fontWeight: 700 }}>{contact.name}</div>
+                          <div style={{ fontSize: '0.75rem', color: '#aab1c5', display: 'flex', flexDirection: 'column', marginTop: '0.15rem' }}>
+                            <span style={{ display: 'inline-flex', alignItems: 'center', gap: '0.25rem' }}>
+                              <Mail size={10} /> {contact.email}
+                            </span>
+                            {contact.phone && (
+                              <span style={{ display: 'inline-flex', alignItems: 'center', gap: '0.25rem', marginTop: '0.1rem' }}>
+                                <Phone size={10} /> {contact.phone}
+                              </span>
+                            )}
+                          </div>
+                        </td>
+                        <td>
+                          <div style={{ fontWeight: 500 }}>{contact.service}</div>
+                        </td>
+                        <td>
+                          <div style={{ fontFamily: 'var(--font-mono)', fontSize: '0.85rem' }}>{contact.budget}</div>
+                        </td>
+                        <td>
+                          <div style={{ display: 'inline-flex', alignItems: 'center', gap: '0.35rem', fontSize: '0.8rem', color: '#aab1c5' }}>
+                            <Calendar size={12} />
+                            {formatDate(contact.createdAt)}
+                          </div>
+                        </td>
+                        <td>
+                          {renderBadge(contact.status)}
+                        </td>
+                        <td style={{ textAlign: 'right' }}>
+                          <button 
+                            onClick={() => setSelectedContact(contact)}
+                            className="admin-btn"
+                            style={{
+                              padding: '0.35rem 0.75rem',
+                              fontSize: '0.8rem',
+                              background: 'rgba(255,255,255,0.04)',
+                              border: '1px solid var(--color-line)',
+                              borderRadius: '8px'
+                            }}
+                          >
+                            <span>Review</span>
+                            <ChevronRight size={14} />
+                          </button>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+
+              {/* Mobile Card List View */}
+              <div className="mobile-card-list">
+                {filteredContacts.map((contact) => (
+                  <div key={contact.id} className="mobile-inquiry-card">
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: '0.5rem' }}>
+                      <div>
+                        <div style={{ fontWeight: 800, fontSize: '0.95rem' }}>{contact.name}</div>
+                        <div style={{ fontSize: '0.75rem', color: '#aab1c5', marginTop: '0.1rem', wordBreak: 'break-all' }}>{contact.email}</div>
+                        {contact.phone && (
+                          <div style={{ fontSize: '0.75rem', color: '#aab1c5', marginTop: '0.05rem' }}>{contact.phone}</div>
+                        )}
+                      </div>
+                      {renderBadge(contact.status)}
+                    </div>
+                    
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '0.2rem', fontSize: '0.8rem', margin: '0.1rem 0' }}>
+                      <div><span style={{ color: '#707892' }}>Service:</span> <span style={{ fontWeight: 600 }}>{contact.service}</span></div>
+                      <div><span style={{ color: '#707892' }}>Budget:</span> <span style={{ fontFamily: 'var(--font-mono)' }}>{contact.budget}</span></div>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '0.25rem', fontSize: '0.75rem', color: '#aab1c5', marginTop: '0.25rem' }}>
+                        <Calendar size={10} />
+                        {formatDate(contact.createdAt)}
+                      </div>
+                    </div>
+
+                    <button 
+                      onClick={() => setSelectedContact(contact)}
+                      className="admin-btn"
+                      style={{
+                        padding: '0.45rem',
+                        fontSize: '0.8rem',
+                        background: 'rgba(255,255,255,0.04)',
+                        border: '1px solid var(--color-line)',
+                        borderRadius: '8px',
+                        width: '100%',
+                        justifyContent: 'center',
+                        marginTop: '0.25rem'
+                      }}
+                    >
+                      <span>Review Details</span>
+                      <ChevronRight size={12} />
+                    </button>
+                  </div>
+                ))}
+              </div>
+            </>
           )}
         </section>
       </main>
