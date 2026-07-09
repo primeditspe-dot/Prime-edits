@@ -338,12 +338,17 @@ body {
   }
   
   .dashboard-grid {
-    grid-template-columns: 1fr;
-    gap: 1rem;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 0.75rem;
   }
   
   .stat-card {
-    padding: 1.25rem;
+    padding: 1rem;
+  }
+
+  .stat-card h3 {
+    font-size: 1.6rem !important;
+    margin-top: 0.25rem !important;
   }
   
   /* Table & List Swap */
