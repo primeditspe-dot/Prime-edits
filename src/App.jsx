@@ -1122,7 +1122,7 @@ export default function App() {
 
               {/* Instagram */}
               <a 
-                href="https://instagram.com/primeedits" 
+                href="https://instagram.com/primedits.pe" 
                 target="_blank" 
                 rel="noopener noreferrer" 
                 className="hover:text-[var(--color-cyan)] transition-all duration-300 flex items-center gap-1.5 text-[10px] font-mono uppercase tracking-wider group cursor-pointer"
