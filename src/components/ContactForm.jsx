@@ -7,6 +7,7 @@ export default function ContactForm() {
     email: '',
     phone: '',
     service: 'YouTube Video Editing',
+    budget: '₹10,000 - ₹25,000',
     message: ''
   });
 
@@ -28,6 +29,14 @@ export default function ContactForm() {
     'Promotional Campaigns',
     'Color Grading & VFX',
     'Custom Pack / Other'
+  ];
+
+  const budgetList = [
+    '₹10,000 - ₹25,000',
+    '₹25,000 - ₹50,000',
+    '₹50,000 - ₹1,00,000',
+    '₹1,00,000+',
+    'Not Specified'
   ];
 
 
@@ -164,6 +173,7 @@ export default function ContactForm() {
           email: '',
           phone: '',
           service: 'YouTube Video Editing',
+          budget: '₹10,000 - ₹25,000',
           message: ''
         });
         removeFile();
@@ -243,8 +253,8 @@ export default function ContactForm() {
           </div>
         </div>
 
-        {/* Phone & Service */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+        {/* Phone, Service & Budget */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
           <div className="flex flex-col gap-2">
             <label className="text-[10px] font-mono font-bold tracking-widest uppercase text-fg-faint" htmlFor="contact-phone">Phone / WhatsApp</label>
             <div className="glass flex items-center rounded-full px-2 py-1.5 border border-white/5 focus-within:border-white/20 transition-colors">
@@ -267,10 +277,26 @@ export default function ContactForm() {
                 name="service" 
                 value={formData.service} 
                 onChange={handleInputChange}
-                className="w-full bg-transparent py-2 text-[0.95rem] text-white focus:outline-none cursor-pointer uppercase font-mono text-xs"
+                className="w-full bg-transparent py-2 text-[0.95rem] text-white focus:outline-none cursor-pointer uppercase font-mono text-xs text-ellipsis overflow-hidden"
               >
                 {servicesList.map((service, idx) => (
                   <option key={idx} value={service} className="bg-[#04050a] text-white uppercase">{service}</option>
+                ))}
+              </select>
+            </div>
+          </div>
+          <div className="flex flex-col gap-2">
+            <label className="text-[10px] font-mono font-bold tracking-widest uppercase text-fg-faint" htmlFor="contact-budget">Estimated Budget</label>
+            <div className="glass flex items-center rounded-full px-5 py-1.5 border border-white/5 focus-within:border-white/20 transition-colors">
+              <select 
+                id="contact-budget"
+                name="budget" 
+                value={formData.budget} 
+                onChange={handleInputChange}
+                className="w-full bg-transparent py-2 text-[0.95rem] text-white focus:outline-none cursor-pointer uppercase font-mono text-xs text-ellipsis overflow-hidden"
+              >
+                {budgetList.map((budget, idx) => (
+                  <option key={idx} value={budget} className="bg-[#04050a] text-white uppercase">{budget}</option>
                 ))}
               </select>
             </div>

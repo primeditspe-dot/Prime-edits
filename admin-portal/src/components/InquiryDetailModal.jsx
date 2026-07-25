@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { 
-  X, Mail, Phone, Calendar, Briefcase, DollarSign, FileText, 
+  X, Mail, Phone, Calendar, Briefcase, IndianRupee, FileText, 
   Trash2, Save, ExternalLink, RefreshCw, AlertCircle
 } from 'lucide-react';
 
@@ -311,7 +311,7 @@ function InquiryDetailModal({ contact, token, onClose, onUpdate }) {
                 </div>
               </div>
               <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
-                <div style={{ color: 'var(--color-cyan)' }}><DollarSign size={16} /></div>
+                <div style={{ color: 'var(--color-cyan)' }}><IndianRupee size={16} /></div>
                 <div>
                   <div style={{ fontSize: '0.75rem', color: '#707892' }}>Estimated Budget</div>
                   <div style={{ fontFamily: 'var(--font-mono)', fontSize: '0.85rem', fontWeight: 600 }}>{contact.budget}</div>
