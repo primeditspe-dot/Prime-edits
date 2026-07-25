@@ -25,7 +25,7 @@ function AdminDashboard({ token, handleLogout }) {
         // Fetch health status
         const healthRes = await fetch('/api/health');
         const healthData = await healthRes.json();
-        setConnectionStatus(healthData.firestore === 'active' ? 'Live Firestore' : 'Mock DB');
+        setConnectionStatus(healthData.supabase === 'active' ? 'Live Supabase' : 'Mock DB');
       } catch (err) {
         setConnectionStatus('Offline');
       }
@@ -174,7 +174,7 @@ function AdminDashboard({ token, handleLogout }) {
               width: '8px',
               height: '8px',
               borderRadius: '50%',
-              backgroundColor: connectionStatus === 'Live Firestore' ? '#14a394' : 
+              backgroundColor: connectionStatus === 'Live Supabase' ? '#14a394' : 
                                connectionStatus === 'Mock DB' ? '#3a86ff' : '#ef4444',
               display: 'inline-block',
               animation: 'pulseGlow 2s infinite'

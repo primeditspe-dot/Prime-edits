@@ -2,7 +2,7 @@ import express from 'express';
 import cors from 'cors';
 import dotenv from 'dotenv';
 import { v2 as cloudinary } from 'cloudinary';
-import admin from 'firebase-admin';
+import { createClient } from '@supabase/supabase-js';
 import path from 'path';
 import { fileURLToPath } from 'url';
 import jwt from 'jsonwebtoken';
@@ -31,29 +31,20 @@ if (process.env.CLOUDINARY_CLOUD_NAME && process.env.CLOUDINARY_API_KEY && proce
   console.warn('⚠️ Cloudinary environment variables are missing. File uploads will run in MOCK mode.');
 }
 
-// Initialize Firebase Admin (Firestore)
-let db = null;
-let isFirestoreConfigured = false;
+// Initialize Supabase Client
+let supabase = null;
+let isSupabaseConfigured = false;
 
 try {
-  if (process.env.FIREBASE_SERVICE_ACCOUNT_JSON) {
-    const serviceAccount = JSON.parse(process.env.FIREBASE_SERVICE_ACCOUNT_JSON);
-    admin.initializeApp({
-      credential: admin.credential.cert(serviceAccount)
-    });
-    db = admin.firestore();
-    isFirestoreConfigured = true;
-    console.log('✔ Firestore initialized successfully via Service Account JSON.');
-  } else if (process.env.GOOGLE_APPLICATION_CREDENTIALS) {
-    admin.initializeApp();
-    db = admin.firestore();
-    isFirestoreConfigured = true;
-    console.log('✔ Firestore initialized via GOOGLE_APPLICATION_CREDENTIALS.');
+  if (process.env.SUPABASE_URL && process.env.SUPABASE_SERVICE_ROLE_KEY) {
+    supabase = createClient(process.env.SUPABASE_URL, process.env.SUPABASE_SERVICE_ROLE_KEY);
+    isSupabaseConfigured = true;
+    console.log('✔ Supabase client initialized successfully.');
   } else {
-    console.warn('⚠️ No Firebase service account provided. Firestore will operate in MOCK mode.');
+    console.warn('⚠️ Supabase environment variables are missing. Supabase will operate in MOCK mode.');
   }
 } catch (error) {
-  console.error('❌ Failed to initialize Firebase Admin:', error.message);
+  console.error('❌ Failed to initialize Supabase client:', error.message);
   console.warn('⚠️ Falling back to MOCK database mode.');
 }
 
@@ -176,19 +167,17 @@ app.get('/api/health', (req, res) => {
   res.json({
     status: 'healthy',
     cloudinary: isCloudinaryConfigured ? 'active' : 'mock',
-    firestore: isFirestoreConfigured ? 'active' : 'mock'
+    supabase: isSupabaseConfigured ? 'active' : 'mock'
   });
 });
 
 // GET: Fetch FAQs
 app.get('/api/faqs', async (req, res) => {
   try {
-    if (isFirestoreConfigured) {
-      const snapshot = await db.collection('faqs').get();
-      if (!snapshot.empty) {
-        const faqs = [];
-        snapshot.forEach(doc => faqs.push({ id: doc.id, ...doc.data() }));
-        return res.json(faqs);
+    if (isSupabaseConfigured) {
+      const { data, error } = await supabase.from('faqs').select('*');
+      if (!error && data && data.length > 0) {
+        return res.json(data);
       }
     }
     // Fallback to mock
@@ -201,12 +190,10 @@ app.get('/api/faqs', async (req, res) => {
 // GET: Fetch Portfolio items
 app.get('/api/portfolio', async (req, res) => {
   try {
-    if (isFirestoreConfigured) {
-      const snapshot = await db.collection('portfolio').get();
-      if (!snapshot.empty) {
-        const items = [];
-        snapshot.forEach(doc => items.push({ id: doc.id, ...doc.data() }));
-        return res.json(items);
+    if (isSupabaseConfigured) {
+      const { data, error } = await supabase.from('portfolio').select('*');
+      if (!error && data && data.length > 0) {
+        return res.json(data);
       }
     }
     // Fallback to mock
@@ -237,10 +224,11 @@ app.post('/api/contact', async (req, res) => {
       createdAt: new Date().toISOString()
     };
 
-    if (isFirestoreConfigured) {
-      const docRef = await db.collection('contacts').add(contactData);
-      console.log(`✔ Contact inquiry saved to Firestore with ID: ${docRef.id}`);
-      return res.status(201).json({ success: true, id: docRef.id, message: 'Inquiry saved successfully.' });
+    if (isSupabaseConfigured) {
+      const { data, error } = await supabase.from('contacts').insert([contactData]).select();
+      if (error) throw error;
+      console.log(`✔ Contact inquiry saved to Supabase with ID: ${data[0].id}`);
+      return res.status(201).json({ success: true, id: data[0].id, message: 'Inquiry saved successfully.' });
     } else {
       const mockId = 'mock_' + Date.now() + '_' + Math.random().toString(36).substr(2, 5);
       const newContact = { id: mockId, ...contactData };
@@ -315,15 +303,13 @@ app.post('/api/admin/login', (req, res) => {
 // GET: Fetch all inquiries (Admin only)
 app.get('/api/admin/contacts', authenticateAdmin, async (req, res) => {
   try {
-    if (isFirestoreConfigured) {
-      const snapshot = await db.collection('contacts').orderBy('createdAt', 'desc').get();
-      const contacts = [];
-      if (!snapshot.empty) {
-        snapshot.forEach(doc => {
-          contacts.push({ id: doc.id, ...doc.data() });
-        });
-      }
-      return res.json(contacts);
+    if (isSupabaseConfigured) {
+      const { data, error } = await supabase
+        .from('contacts')
+        .select('*')
+        .order('createdAt', { ascending: false });
+      if (error) throw error;
+      return res.json(data || []);
     }
     
     // Return mock contacts sorted desc by date
@@ -350,8 +336,12 @@ app.patch('/api/admin/contacts/:id/status', authenticateAdmin, async (req, res) 
       return res.status(400).json({ error: 'Invalid status value.' });
     }
 
-    if (isFirestoreConfigured) {
-      await db.collection('contacts').doc(id).update({ status });
+    if (isSupabaseConfigured) {
+      const { error } = await supabase
+        .from('contacts')
+        .update({ status })
+        .eq('id', id);
+      if (error) throw error;
       return res.json({ success: true, message: `Status updated to ${status}` });
     }
 
@@ -379,8 +369,12 @@ app.patch('/api/admin/contacts/:id/notes', authenticateAdmin, async (req, res) =
       return res.status(400).json({ error: 'Notes string is required.' });
     }
 
-    if (isFirestoreConfigured) {
-      await db.collection('contacts').doc(id).update({ notes });
+    if (isSupabaseConfigured) {
+      const { error } = await supabase
+        .from('contacts')
+        .update({ notes })
+        .eq('id', id);
+      if (error) throw error;
       return res.json({ success: true, message: 'Notes updated successfully.' });
     }
 
@@ -403,8 +397,12 @@ app.delete('/api/admin/contacts/:id', authenticateAdmin, async (req, res) => {
   try {
     const { id } = req.params;
 
-    if (isFirestoreConfigured) {
-      await db.collection('contacts').doc(id).delete();
+    if (isSupabaseConfigured) {
+      const { error } = await supabase
+        .from('contacts')
+        .delete()
+        .eq('id', id);
+      if (error) throw error;
       return res.json({ success: true, message: 'Inquiry deleted successfully.' });
     }
 
